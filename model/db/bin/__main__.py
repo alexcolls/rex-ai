@@ -3,7 +3,7 @@
 # license: MIT
 
 from sys import argv
-from data import PrimaryData
+from model.data import PrimaryData
 
 if __name__ == "__main__":
 
