@@ -3,7 +3,7 @@
 
 Install & Run
 
-> git clone https://github.com/quantium-rock/fx-oanda
+> git clone https://github.com/quantium-rock/rex-ai
 
 > cd fx-oanda/model
 
