@@ -8,9 +8,7 @@ with open('requirements.txt') as f:
 requirements = [x.strip() for x in content]
 
 setup(
-    #   name='model',
-    #   description="Model with code",
-      packages=find_packages(),
-      install_requires=requirements
-    #   packages=["model"])
-    )
+    # name=['model.db','model.db.bin'],
+    description="Model with code",
+    packages=find_packages(),
+    install_requires=requirements)

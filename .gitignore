@@ -1,5 +1,29 @@
+.env
+.env.yaml
+
+# OS generated files #
+######################
+.DS_Store
+__MACOSX
+# Jupiter Notebook #
+.pytest_cache
+__pycache__
+*checkpoint.ipynb
+*.ipynb_checkpoints
+
+*.pyc
+*.swp
+.coverage
+*.iml
+*.egg-info
+
+# IDE #
+*.vscode
+
 __pycache__
 model/config.py
 .python-version
 *.csv
-.env
+*.sqlite
+*.zip
+training_outputs/
