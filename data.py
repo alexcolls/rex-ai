@@ -10,12 +10,13 @@ from datetime import datetime
 from datetime import timedelta
 
 # import Oanda api & instruments
-from db.bin.apis.oanda_api import OandaApi
-from config import SYMBOLS
-from config import TIMEFRAME
+from model.db.bin.apis.oanda_api import OandaApi
+from model.config import SYMBOLS
+from model.config import TIMEFRAME
 
-with open("env/variables.json") as x:
-    FIRST_YEAR = json.load(x)['FIRST_YEAR']
+from sys import argv
+
+FIRST_YEAR = int(argv[1])
 
 ### PrimaryData -> ../data/primary/<year>/<week>/:
 #   asks.csv, bids.csv, mids.csv, spreads.csv, volumes.csv
