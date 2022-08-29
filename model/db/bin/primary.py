@@ -201,7 +201,8 @@ class PrimaryData:
                             l = float(x[p]['l']) # low
                             c = float(x[p]['c']) # close
                             # round price = ( o + h + l + 2c ) * 0.2
-                            data[p].append( round(( o + h + l + 2*c ) / 5, digits) )
+                            #data[p].append( round(( o + h + l + 2*c ) / 5, digits) )
+                            data[p].append(c)
 
                         # append period trading raw volume
                         data['volume'].append(int(x['volume']))

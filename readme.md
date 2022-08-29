@@ -5,7 +5,7 @@ Install & Run
 
 > git clone https://github.com/quantium-rock/rex-ai
 
-> cd  rex-ai/model
+> cd rex-ai/model
 
 > python3 run.py
 
