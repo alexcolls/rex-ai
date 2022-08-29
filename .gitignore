@@ -1,2 +1,4 @@
 __pycache__
+model/config.py
+.python-version
 *.csv
