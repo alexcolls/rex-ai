@@ -3,16 +3,15 @@
 # license: MIT
 
 import os
-import json
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
 from datetime import timedelta
 
 # import Oanda api & instruments
-from model.db.bin.apis.oanda_api import OandaApi
-from model.config import SYMBOLS
-from model.config import TIMEFRAME
+from db.bin.apis.oanda_api import OandaApi
+from config import SYMBOLS
+from config import TIMEFRAME
 
 from sys import argv
 
@@ -280,9 +279,11 @@ class PrimaryData:
     ##_AsksBids.getAsksBids()
 
 
+downData = PrimaryData()
 
-    
-    
+downData.checkDB()
+downData.updateDB()
+
 
 
 
