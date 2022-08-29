@@ -3,7 +3,6 @@
 # license: MIT
 
 import os
-import json
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
@@ -280,9 +279,10 @@ class PrimaryData:
     ##_AsksBids.getAsksBids()
 
 
+downData = PrimaryData()
 
-    
-    
+downData.updateDB()
+
 
 
 
