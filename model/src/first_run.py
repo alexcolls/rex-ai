@@ -27,7 +27,7 @@ def firstRun():
             os.system("pip3 --version")
             os.system("pip3 install --upgrade pip")
             print('\ninstalling requiered dependencies...\n')
-            os.system("pip3 install requirements.txt ")
+            os.system("pip3 install r- env/requirements.txt ")
     except:
         print("\nPlease, install latest Python3 in your system: https://www.python.org/downloads/")
 
