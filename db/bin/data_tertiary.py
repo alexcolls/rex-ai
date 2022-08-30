@@ -40,8 +40,8 @@ class TertiaryData ( SecondaryData ):
         logs_ = pd.read_csv(in_path + 'logs_.csv', index_col=0)
         rets_ = pd.read_csv(in_path + 'rets_.csv', index_col=0)
         vols_ = pd.read_csv(in_path + 'vols_.csv', index_col=0)
-        hi_ = pd.read_csv(in_path + 'hi_.csv', index_col=0)
-        lows_ = pd.read_csv(in_path + 'lo_.csv', index_col=0)
+        higs_ = pd.read_csv(in_path + 'higs_.csv', index_col=0)
+        lows_ = pd.read_csv(in_path + 'lows_.csv', index_col=0)
         
         ln = len(self.ccys)
 
