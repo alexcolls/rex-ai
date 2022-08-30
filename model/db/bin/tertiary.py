@@ -4,7 +4,7 @@
 
 import numpy as np
 import pandas as pd
-from db.bin.secondary import SecondaryData
+from db.bin.data_secondary import SecondaryData
 
 
 

@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
-from db.bin.primary import PrimaryData
+from db.bin.data_primary import PrimaryData
 
 
 class SecondaryData ( PrimaryData ):

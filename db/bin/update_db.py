@@ -2,35 +2,35 @@
 # author: Quantium Rock
 # license: MIT
 
-import json
-from db.bin.data_primary import PrimaryData
-from db.bin.data_secondary import SecondaryData
+from data_primary import PrimaryData
+from data_secondary import SecondaryData
+from data_tertiary import TertiaryData
 
 
 def updateDB():
 
-    with open("env/variables.json") as x:
-        FIRST_YEAR = json.load(x)['FIRST_YEAR']
-
-    primaryData = PrimaryData( start_year=FIRST_YEAR )
+    primaryData = PrimaryData()
     secondaryData = SecondaryData()
+    tertiaryData = TertiaryData()
 
     print('\n### PRIMARY DB ###')
     primaryData.checkDB()
 
-    if primaryData.missing_weeks or primaryData.missing_years:
-
+    if primaryData.missing_years:
         # user confirmation
         input('\nUpdate primary database?\n> Press Enter to proceed\n\n>>> ')
-
-        # update DB    
         primaryData.updateDB()
     
     print('\n### SECONDARY DB ###')
     secondaryData.checkDB()
+    print('\n> Updating secondary data...')
     secondaryData.updateDB()
+
+    print('\n### TERTIARY DB ###')
+    tertiaryData.checkDB()
+    print('\n> Updating tertiary data...')
+    tertiaryData.updateDB()
 
 
 if __name__ == "__main__":
     updateDB()
-
