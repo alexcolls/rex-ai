@@ -21,7 +21,6 @@ __pycache__
 *.vscode
 
 __pycache__
-model/config.py
 .python-version
 *.csv
 *.sqlite

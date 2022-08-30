@@ -9,6 +9,6 @@ requirements = [x.strip() for x in content]
 
 setup(
     # name=['model.db','model.db.bin'],
-    description="Model with code",
+    # description="Model with code",
     packages=find_packages(),
     install_requires=requirements)
