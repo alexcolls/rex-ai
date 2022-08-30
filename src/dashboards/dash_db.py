@@ -50,11 +50,15 @@ app.layout = html.Div(style={'margin': '80px'} ,children=[
 
         dcc.Graph(id='chart-rets'),
 
-        html.H4(children='Volatilities'),
+        html.H4(children='Volatilities (%)'),
 
         dcc.Graph(id='chart-vols'),
 
+        html.H4(children='Highs (%)'),
+
         dcc.Graph(id='chart-higs'),
+
+        html.H4(children='Lows (%)'),
 
         dcc.Graph(id='chart-lows'),
         
