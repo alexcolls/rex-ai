@@ -23,6 +23,4 @@ __pycache__
 __pycache__
 .python-version
 *.csv
-*.sqlite
-*.zip
-training_outputs/
+
