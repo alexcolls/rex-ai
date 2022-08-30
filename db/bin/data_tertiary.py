@@ -87,8 +87,3 @@ class TertiaryData ( SecondaryData ):
 
         del logs_, rets_, vols_, higs_, lows_, idxs_
 
-
-
-        
-
-
