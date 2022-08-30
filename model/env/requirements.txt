@@ -1,6 +1,0 @@
-beautifulsoup4==4.11.1
-dash_core_components==1.15.0
-dash_html_components==1.1.2
-numpy==1.23.1
-pandas==1.4.3
-requests==2.22.0
