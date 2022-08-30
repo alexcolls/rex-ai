@@ -12,7 +12,7 @@ import os
 
 dropDown = {}
 
-db_path = 'db/data/secondary/'
+db_path = 'db/data/tertiary/'
 
 years = os.listdir(db_path)
 for yr in years:
@@ -40,7 +40,7 @@ app.layout = html.Div(style={'margin': '80px'} ,children=[
 
     html.H2(style={ 'margin-top': '50px'}, children='Market logarithmic returns (%)'),
 
-        #dcc.Graph(id='chart-idxs'),
+        dcc.Graph(id='chart-idxs'),
 
         html.H4(children='Logarithmic Returns (%)'),
 
@@ -63,7 +63,7 @@ app.layout = html.Div(style={'margin': '80px'} ,children=[
 # set up callback function
 @ app.callback(
 
-    #Output(component_id='chart-idxs', component_property='figure'),
+    Output(component_id='chart-idxs', component_property='figure'),
     Output(component_id='chart-logs', component_property='figure'),
     Output(component_id='chart-rets', component_property='figure'),
 
@@ -73,29 +73,25 @@ app.layout = html.Div(style={'margin': '80px'} ,children=[
 
     Input(component_id='year', component_property='value'),
 
-    #Input(component_id='filter_order', component_property='value'),
-    #Input(component_id='cutoff_freq', component_property='value')
-
 )
 def selectWeek( year ):
 
     # load tertiary db
-    #idxs_ = pd.read_csv(db_path + str(year) + '/idxs_.csv', index_col=0)
+    idxs_ = pd.read_csv(db_path + str(year) + '/idxs_.csv', index_col=0)
     logs_ = pd.read_csv(db_path + str(year) + '/logs_.csv', index_col=0)
     rets_ = pd.read_csv(db_path + str(year) + '/rets_.csv', index_col=0)
     vols_ = pd.read_csv(db_path + str(year) + '/vols_.csv', index_col=0)
     higs_ = pd.read_csv(db_path + str(year) + '/higs_.csv', index_col=0)
     lows_ = pd.read_csv(db_path + str(year) + '/lows_.csv', index_col=0)
 
-    #idxs_plt = px.line(idxs_, height=600)
+    idxs_plt = px.line(idxs_, height=600)
     logs_plt = px.line(logs_, height=400)
     rets_plt = px.line(rets_, height=400)
     vols_plt = px.line(vols_, height=400)
     higs_plt = px.line(higs_, height=400)
     lows_plt = px.line(lows_, height=400)
     
-    return logs_plt, rets_plt, vols_plt, higs_plt, lows_plt
-
+    return idxs_plt, logs_plt, rets_plt, vols_plt, higs_plt, lows_plt
 
 
 # run local server
