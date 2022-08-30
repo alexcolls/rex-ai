@@ -107,11 +107,6 @@ class PrimaryData:
                 # request 5000 bars from oanda rest-api
                 req = oanda_api.getCandles( symbol, self.timeframe, start_date, include_frist=True )
 
-                # print first date and last date of the request
-                try:
-                    print(req[0]['time'][:19], req[-1]['time'][:19])
-                except: pass
-
                 # iterate each candle
                 for x in req:
                     # if current candle time changed year
