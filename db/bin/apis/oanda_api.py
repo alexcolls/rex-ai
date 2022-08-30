@@ -52,14 +52,14 @@ class OandaApi:
     
     def getCandles ( self, symbol, timeframe, start_date, count=5000, include_frist=False, api_version='v3', mids=True ):
 
-        prices = 'M' if mids else 'BA' # BidAsk
+        prices = 'M' if mids else 'BA' # Mids or BidAsks
 
         try:
             req = self.client.get(f'{self.enviroment}/{api_version}/instruments/{symbol}/candles?count={count}&price={prices}&granularity={timeframe}&from={start_date}&includeFirst={include_frist}')
 
             return json.loads(req.content.decode('utf-8'))['candles']
         except:
-            return 0
+            print('OANDA API ERROR', Exception)
 
 
     # ORDER EXECUTOR
