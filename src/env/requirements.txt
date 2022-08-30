@@ -1,5 +1,0 @@
-scipy
-pandas
-numpy
-dash
-plotly
