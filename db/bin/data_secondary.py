@@ -21,11 +21,10 @@ class SecondaryData ( PrimaryData ):
     def getData ( self, year=2022 ):
 
         in_path = self.primary_path + str(year) +'/'
-
         out_path = self.secondary_path + str(year) +'/'
         Path(out_path).mkdir(parents=True, exist_ok=True)
 
-        # load mid prices
+        # load primary data
         op = pd.read_csv(in_path + 'opens.csv', index_col=0)
         hi = pd.read_csv(in_path + 'highs.csv', index_col=0)
         lo = pd.read_csv(in_path + 'lows.csv', index_col=0)

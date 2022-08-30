@@ -71,7 +71,10 @@ class TertiaryData ( SecondaryData ):
         higs_.to_csv(out_path + 'higs_.csv', index=True)
         lows_.to_csv(out_path + 'lows_.csv', index=True)
 
-        del logs_, rets_, vols_, higs_, lows_
+        idxs_ = logs_.cumsum() + 100 # sintentic standarized ccy idxs prices
+        idxs_.to_csv(out_path + 'idxs_.csv', index=True)
+
+        del logs_, rets_, vols_, higs_, lows_, idxs_
 
 
 

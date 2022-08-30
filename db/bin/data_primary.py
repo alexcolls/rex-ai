@@ -4,7 +4,7 @@
 
 import os
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import pandas as pd
 
 from apis.oanda_api import OandaApi
@@ -83,14 +83,22 @@ class PrimaryData:
 
         oanda_api = OandaApi()
 
-        start_date = str(year) + '-01-01'
+        # get all trading hours of the years in datetime list
+        dtimes = []
+        start_date = datetime(year, 1, 2)
+        start_date = start_date.replace(tzinfo=timezone.utc)
+        for days in range(365):
+            today = start_date + timedelta(days=days)
+            if today.weekday() < 5:
+                for hour in range(24):
+                    dtimes.append( today + timedelta(hours=hour) )
 
         # init daily dataframes indices for asks & bids
-        op = pd.DataFrame(index=[start_date])
-        hi = pd.DataFrame(index=[start_date])
-        lo = pd.DataFrame(index=[start_date])
-        cl = pd.DataFrame(index=[start_date])
-        vo = pd.DataFrame(index=[start_date])
+        op = pd.DataFrame(index=dtimes)
+        hi = pd.DataFrame(index=dtimes)
+        lo = pd.DataFrame(index=dtimes)
+        cl = pd.DataFrame(index=dtimes)
+        vo = pd.DataFrame(index=dtimes)
 
         # iterate each instrument to get a full week data each
         for symbol in self.symbols:
@@ -134,20 +142,25 @@ class PrimaryData:
             # ^ finished symbol year
 
             # transform data to prices dataframe
-            dfs = []
-            for i in list(data.keys())[1:]:
-                df = pd.DataFrame(data[i], index=data['dtime'], columns=[symbol])
-                #df.index = pd.to_datetime(df.index)
-                dfs.append( df )
+            _op = pd.DataFrame(data['open'], index=data['dtime'], columns=[symbol])
+            _op.index = pd.to_datetime(_op.index, utc=True)
+            _hi = pd.DataFrame(data['high'], index=data['dtime'], columns=[symbol])
+            _hi.index = pd.to_datetime(_hi.index, utc=True)
+            _lo = pd.DataFrame(data['low'], index=data['dtime'], columns=[symbol])
+            _lo.index = pd.to_datetime(_lo.index, utc=True)
+            _cl = pd.DataFrame(data['close'], index=data['dtime'], columns=[symbol])
+            _cl.index = pd.to_datetime(_cl.index, utc=True)
+            _vo = pd.DataFrame(data['volume'], index=data['dtime'], columns=[symbol])
+            _vo.index = pd.to_datetime(_vo.index, utc=True)
 
-            op = pd.merge(op, dfs[0], how='outer', left_index=True, right_index=True)
-            hi = pd.merge(hi, dfs[1], how='outer', left_index=True, right_index=True)
-            lo = pd.merge(lo, dfs[2], how='outer', left_index=True, right_index=True)
-            cl = pd.merge(cl, dfs[3], how='outer', left_index=True, right_index=True)
-            vo = pd.merge(vo, dfs[4], how='outer', left_index=True, right_index=True)
+            op = pd.merge(op, _op, how='outer', left_index=True, right_index=True)
+            hi = pd.merge(hi, _hi, how='outer', left_index=True, right_index=True)
+            lo = pd.merge(lo, _lo, how='outer', left_index=True, right_index=True)
+            cl = pd.merge(cl, _cl, how='outer', left_index=True, right_index=True)
+            vo = pd.merge(vo, _vo, how='outer', left_index=True, right_index=True)
 
             # realese memory
-            del data, dfs
+            del data, _op, _hi, _lo, _cl, _vo
 
         # ^ finished all symbols
 
