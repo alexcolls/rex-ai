@@ -123,7 +123,7 @@ class PrimaryData:
                     data['dtime'].append( x['time'] )
                     data['open'].append( float(x['mid']['o']) )
                     data['high'].append( float(x['mid']['h']) )
-                    data['low'].append( float(x['mid']['h']) )
+                    data['low'].append( float(x['mid']['l']) )
                     data['close'].append( float(x['mid']['c']) )
                     data['volume'].append( int(x['volume']) )
                 

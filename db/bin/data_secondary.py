@@ -44,7 +44,7 @@ class SecondaryData ( PrimaryData ):
         higs_.to_csv(out_path + 'higs_.csv', index=True)
         lows_.to_csv(out_path + 'lows_.csv', index=True)
 
-        del logs_, rets_, vols_, higs_, lows_
+        del op, hi, lo, cl, logs_, rets_, vols_, higs_, lows_
 
         return True
 
