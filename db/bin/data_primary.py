@@ -221,4 +221,4 @@ class PrimaryData:
 
         return True
 
-    ##__primarData.getYear()
+    ##__primarData.getData()
