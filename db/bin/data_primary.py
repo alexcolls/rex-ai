@@ -89,7 +89,7 @@ class PrimaryData:
         dtimes = []
         first_date = datetime(year, 1, 2)
         first_date = first_date.replace(tzinfo=timezone.utc)
-        for days in range(365):
+        for days in range(360):
             today = first_date + timedelta(days=days)
             if today.weekday() < 5:
                 for hour in range(24):
@@ -160,11 +160,11 @@ class PrimaryData:
             _vo = pd.DataFrame(data['volume'], index=data['dtime'], columns=[symbol])
             _vo.index = pd.to_datetime(_vo.index, utc=True)
 
-            op = pd.merge(op, _op, how='outer', left_index=True, right_index=True)
-            hi = pd.merge(hi, _hi, how='outer', left_index=True, right_index=True)
-            lo = pd.merge(lo, _lo, how='outer', left_index=True, right_index=True)
-            cl = pd.merge(cl, _cl, how='outer', left_index=True, right_index=True)
-            vo = pd.merge(vo, _vo, how='outer', left_index=True, right_index=True)
+            op = pd.merge(op, _op, how='left', left_index=True, right_index=True)
+            hi = pd.merge(hi, _hi, how='left', left_index=True, right_index=True)
+            lo = pd.merge(lo, _lo, how='left', left_index=True, right_index=True)
+            cl = pd.merge(cl, _cl, how='left', left_index=True, right_index=True)
+            vo = pd.merge(vo, _vo, how='left', left_index=True, right_index=True)
 
             # realese memory
             del data, _op, _hi, _lo, _cl, _vo
