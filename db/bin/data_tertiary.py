@@ -71,13 +71,19 @@ class TertiaryData ( SecondaryData ):
         higs_.to_csv(out_path + 'higs_.csv', index=True)
         lows_.to_csv(out_path + 'lows_.csv', index=True)
 
-        idxs_ = logs_.cumsum() + 100 # sintentic standarized ccy idxs prices
+        idxs_ = pd.DataFrame(index=rets_.index, columns=self.ccys)
+        # create synthetic standarize idxs prices
+        last_dt = 0
+        for ccy in self.ccys:
+            for i, dtime in enumerate(rets_.index):
+                if i == 0:
+                    idxs_[ccy][dtime] = 100
+                    last_dt = dtime
+                else:
+                    idxs_[ccy][dtime] = idxs_[ccy][last_dt] * (1+rets_[ccy][dtime]/100)
+                    last_dt = dtime
+
         idxs_.to_csv(out_path + 'idxs_.csv', index=True)
 
         del logs_, rets_, vols_, higs_, lows_, idxs_
-
-
-
-        
-
 

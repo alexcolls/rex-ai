@@ -11,6 +11,8 @@ from apis.oanda_api import OandaApi
 from config import SYMBOLS
 from config import TIMEFRAME
 
+import time
+
 
 ### PrimaryData -> download candles from oanda_api to ../data/primary/<year>/:
 # opens.csv, highs.csv, lows.csv, closes.csv, volumes.csv
@@ -85,10 +87,10 @@ class PrimaryData:
 
         # get all trading hours of the years in datetime list
         dtimes = []
-        start_date = datetime(year, 1, 2)
-        start_date = start_date.replace(tzinfo=timezone.utc)
+        first_date = datetime(year, 1, 2)
+        first_date = first_date.replace(tzinfo=timezone.utc)
         for days in range(365):
-            today = start_date + timedelta(days=days)
+            today = first_date + timedelta(days=days)
             if today.weekday() < 5:
                 for hour in range(24):
                     dtimes.append( today + timedelta(hours=hour) )
@@ -103,6 +105,8 @@ class PrimaryData:
         # iterate each instrument to get a full week data each
         for symbol in self.symbols:
 
+            start_date = str(year) + '-01-02T00:00:00.000000000Z'
+
             print(symbol)
  
             # initialize symbol data struct
@@ -113,7 +117,7 @@ class PrimaryData:
             while iterate:
 
                 # request 5000 bars from oanda rest-api
-                req = oanda_api.getCandles( symbol, self.timeframe, start_date, include_frist=True )
+                req = oanda_api.getCandles( symbol, self.timeframe, start_date )
 
                 # iterate each candle
                 for x in req:
@@ -129,13 +133,16 @@ class PrimaryData:
                     data['low'].append( float(x['mid']['l']) )
                     data['close'].append( float(x['mid']['c']) )
                     data['volume'].append( int(x['volume']) )
+
+                    #print(float(x['mid']['l']), x['time'])
                 
                 if len(data['dtime']) > 0:
-                # only for current year: check if there is no more history
+                    # only for current year: check if there is no more history
                     if start_date == data['dtime'][-1]:
                         iterate = False
                         del req
                         break
+
                     # otherwise update start_date with last loop request
                     start_date = data['dtime'][-1]
 
@@ -163,7 +170,7 @@ class PrimaryData:
             del data, _op, _hi, _lo, _cl, _vo
 
         # ^ finished all symbols
-
+        
         # fill nans with forward-fill (last non-nan price)
         op.fillna(method='ffill', inplace=True)
         hi.fillna(method='ffill', inplace=True)
@@ -178,7 +185,7 @@ class PrimaryData:
 
         # fill volume nans with 0
         vo.fillna(0, inplace=True)
-
+        
         # create path ../data/primary/<year>/
         out_path = self.primary_path + str(year) + '/'
         Path(out_path).mkdir(parents=True, exist_ok=True)
