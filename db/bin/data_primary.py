@@ -173,19 +173,11 @@ class PrimaryData:
             _vo = pd.DataFrame(data["volume"], index=data["dtime"], columns=[symbol])
             _vo.index = pd.to_datetime(_vo.index, utc=True)
 
-<<<<<<< HEAD
             op = pd.merge(op, _op, how='left', left_index=True, right_index=True)
             hi = pd.merge(hi, _hi, how='left', left_index=True, right_index=True)
             lo = pd.merge(lo, _lo, how='left', left_index=True, right_index=True)
             cl = pd.merge(cl, _cl, how='left', left_index=True, right_index=True)
             vo = pd.merge(vo, _vo, how='left', left_index=True, right_index=True)
-=======
-            op = pd.merge(op, _op, how="outer", left_index=True, right_index=True)
-            hi = pd.merge(hi, _hi, how="outer", left_index=True, right_index=True)
-            lo = pd.merge(lo, _lo, how="outer", left_index=True, right_index=True)
-            cl = pd.merge(cl, _cl, how="outer", left_index=True, right_index=True)
-            vo = pd.merge(vo, _vo, how="outer", left_index=True, right_index=True)
->>>>>>> db021afe2a516d8a15d497ab7ba7d9da9b323cfc
 
             # realese memory
             del data, _op, _hi, _lo, _cl, _vo
