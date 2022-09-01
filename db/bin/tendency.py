@@ -20,7 +20,7 @@ class TendencyFeatures(TertiaryData):
 
         logs = pd.read_csv(os.path.join(DATA_PATH, "tertiary", "logs_.csv"), index_col=0)
         logs_= pd.read_csv(os.path.join(DATA_PATH, "secondary", "logs_.csv"), index_col=0)
-
+        time = time_standard(df=logs)
         print("\n### LOWPASS FILTERING ###")
         l = lowpass_filter(df=logs)
         print("\n### HIGHPASS FILTERING ###")
@@ -30,14 +30,14 @@ class TendencyFeatures(TertiaryData):
         print("\n### CALCULATING EMA ###")
         e = ema(df=logs, window=48)
         print("\n### TIME SCALING ###")
-        time = time_standard(df=logs)
+
 
         data = l.join(h)
         data = data.join(r)
         data = data.join(e)
-        data = data.join(time)
         data = logs_.join(data)
-
+        data = data.join(time, how="outer")
+        print(data.iloc[:,-10:])
 
         print("\n### CREATING tendency.csv ###")
         file_path = os.path.join(DATA_PATH, "tendency")

@@ -22,22 +22,25 @@ import scipy.signal as sig
 def time_standard(df):
     # Spliting Datetime
     data = pd.DataFrame([])
-    df.index = pd.to_datetime(df.index)
-    data['month'] = df.index.month
-    data['day'] = df.index.day_of_year
-    data['weekday'] = df.index.weekday
-    data['hour'] = df.index.hour
+    data.index = df.index
+    data.index = pd.to_datetime(data.index)
+    data['month'] = data.index.month
+    data['day'] = data.index.day_of_year
+    data['weekday'] = data.index.weekday
+    data['hour'] = data.index.hour
 
 
-    data["month_sin"] = np.sin((np.array(data['month'])*math.pi*2)/12)
-    data["month_cos"]=np.cos((np.array(data['month'])*math.pi*2)/12)
-    data["day_sin"] = np.sin((np.array(data['day'])*math.pi*2)/360)
-    data["day_cos"]=np.cos((np.array(data['day'])*math.pi*2)/360)
-    data["weekday_sin"] = np.sin((np.array(data['weekday'])*math.pi*2)/7)
-    data["weekday_cos"]=np.cos((np.array(data['weekday'])*math.pi*2)/7)
-    data["hour_sin"] = np.sin((np.array(data['hour'])*math.pi*2)/24)
-    data["hour_cos"]=np.cos((np.array(data['hour'])*math.pi*2)/24)
+    data["month_sin"] = np.sin((np.array(data.index.month)*math.pi*2)/12)
+    data["month_cos"]=np.cos((np.array(data.index.month)*math.pi*2)/12)
+    data["day_sin"] = np.sin((np.array(data.index.day_of_year)*math.pi*2)/360)
+    data["day_cos"]=np.cos((np.array(data.index.day_of_year)*math.pi*2)/360)
+    data["weekday_sin"] = np.sin((np.array(data.index.weekday)*math.pi*2)/7)
+    data["weekday_cos"]=np.cos((np.array(data.index.weekday)*math.pi*2)/7)
+    data["hour_sin"] = np.sin((np.array(data.index.hour)*math.pi*2)/24)
+    data["hour_cos"]=np.cos((np.array(data.index.hour)*math.pi*2)/24)
+    data.index = df.index
     data.drop(columns=['month', 'day','weekday','hour'], inplace=True)
+    print(type(data.index))
     return data
 
 
