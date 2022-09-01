@@ -7,7 +7,6 @@ def merge_db_data():
     DATA_PATH = os.path.normpath(
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "../", "data")
     )
-    print(DATA_PATH)
 
     dirs = ["primary", "secondary", "tertiary"]
 
@@ -20,7 +19,7 @@ def merge_db_data():
                 continue
             year_path = os.path.join(path, year_dir)
             for file in os.listdir(year_path):
-                file_path = os.path.join(year_path, file)
+                file_path = os.path.join(year_path, file)   
                 file_name = file.split(".")[0]
                 data = pd.read_csv(file_path, index_col=0)
                 merge[file_name] = pd.concat(
@@ -32,7 +31,7 @@ def merge_db_data():
             file_path = os.path.join(DATA_PATH, "merge", d)
             Path(file_path).mkdir(parents=True, exist_ok=True)
             merge[k].to_csv(os.path.join(file_path, f"{k}.csv"))
-            print(f"\t{k} shape {merge[k].shape}    ")
+            print(f"{k} shape {merge[k].shape}    ")
 
 
 if __name__ == "__main__":
