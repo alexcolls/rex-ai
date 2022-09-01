@@ -14,7 +14,7 @@ from numpy import array
  
 # date-time parsing function for loading the dataset
 def parser(x):
-	return datetime.strptime('190'+x, '%Y-%m')
+	return datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
  
 # convert time series into supervised learning problem
 def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
@@ -153,19 +153,19 @@ def plot_forecasts(series, forecasts, n_test):
 	pyplot.show()
  
 # load dataset
-series = read_csv('../../db/data/tertiary/2010/idxs_.csv', header=0, parse_dates=[0], index_col=0, squeeze=True)
-series = series['AUD']
+y = read_csv('../../db/data/secondary/2010/logs_.csv', header=0, parse_dates=[0], index_col=0, squeeze=True)
+y = y['AUD_CAD']
 
 # configure
 n_lag = 1
-n_seq = 3
+n_seq = 24
 n_test = 10
-n_epochs = 1500
+n_epochs = 100
 n_batch = 1
 n_neurons = 1
 
 # prepare data
-scaler, train, test = prepare_data(series, n_test, n_lag, n_seq)
+scaler, train, test = prepare_data(y, n_test, n_lag, n_seq)
 
 # fit model
 model = fit_lstm(train, n_lag, n_seq, n_batch, n_epochs, n_neurons)
@@ -174,7 +174,7 @@ model = fit_lstm(train, n_lag, n_seq, n_batch, n_epochs, n_neurons)
 forecasts = make_forecasts(model, n_batch, train, test, n_lag, n_seq)
 
 # inverse transform forecasts and test
-forecasts = inverse_transform(series, forecasts, scaler, n_test+2)
+forecasts = inverse_transform(model, forecasts, scaler, n_test+2)
 actual = [row[n_lag:] for row in test]
 actual = inverse_transform(series, actual, scaler, n_test+2)
 

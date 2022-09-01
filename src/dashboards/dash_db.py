@@ -10,57 +10,57 @@ import plotly.express as px
 import pandas as pd
 import os
 
-dropDown = {}
+drop_years = []
+path = 'db/data/primary/'
 
-db_path = 'db/data/tertiary/'
-
-years = os.listdir(db_path)
+years = os.listdir(path)
 for yr in years:
     try:
-        dropDown[int(yr)] = []
-        dropDown[int(yr)].sort()
+        drop_years.append(int(yr))
     except:
-        continue        
-
-current_year = list(dropDown.keys())[0]
+        continue    
 
 # create the Dash app
-app = dash.Dash('Model Dashboard')
-
-params = [ 'Year', 'Week' ]
+app = dash.Dash()
 
 # set up the app layout
 app.layout = html.Div(style={'margin': '80px'} ,children=[
 
-    html.H1(children='MODEL DASHBOARD'),
+    html.H1(children='DB DASHBOARD'),
 
     html.H3(children='Select year: '),
 
-    dcc.Dropdown(id='year', options=[ {'label': yr, 'value': yr} for yr in dropDown.keys() ], value=current_year),
+    dcc.Dropdown(id='year', options=[ {'label': yr, 'value': yr} for yr in drop_years ], value=2021),
 
-    html.H2(style={ 'margin-top': '50px'}, children='Market logarithmic returns (%)'),
+    html.H3(children='Select database: '),
 
-        dcc.Graph(id='chart-idxs'),
+    dcc.Dropdown(id='db_level', options=[ 'secondary', 'tertiary' ], value='tertiary'),
 
-        html.H4(children='Logarithmic Returns (%)'),
+    html.H2(children='___'),
 
-        dcc.Graph(id='chart-logs'),
+    html.H4(children='Cumulative Log Returns (%)'),
 
-        html.H4(children='Returns (%)'),
+    dcc.Graph(id='chart-idxs'),
 
-        dcc.Graph(id='chart-rets'),
+    html.H4(children='Logarithmic Returns (%)'),
 
-        html.H4(children='Volatilities (%)'),
+    dcc.Graph(id='chart-logs'),
 
-        dcc.Graph(id='chart-vols'),
+    html.H4(children='Returns (%)'),
 
-        html.H4(children='Highs (%)'),
+    dcc.Graph(id='chart-rets'),
 
-        dcc.Graph(id='chart-higs'),
+    html.H4(children='Volatilities (%)'),
 
-        html.H4(children='Lows (%)'),
+    dcc.Graph(id='chart-vols'),
 
-        dcc.Graph(id='chart-lows'),
+    html.H4(children='Highs (%)'),
+
+    dcc.Graph(id='chart-higs'),
+
+    html.H4(children='Lows (%)'),
+
+    dcc.Graph(id='chart-lows'),
         
 ])
 
@@ -76,9 +76,12 @@ app.layout = html.Div(style={'margin': '80px'} ,children=[
     Output(component_id='chart-lows', component_property='figure'),
 
     Input(component_id='year', component_property='value'),
+    Input(component_id='db_level', component_property='value'),
 
 )
-def selectWeek( year ):
+def selectWeek( year, db_level ):
+
+    db_path = f'db/data/{db_level}/' 
 
     # load tertiary db
     idxs_ = pd.read_csv(db_path + str(year) + '/idxs_.csv', index_col=0)
@@ -88,11 +91,17 @@ def selectWeek( year ):
     higs_ = pd.read_csv(db_path + str(year) + '/higs_.csv', index_col=0)
     lows_ = pd.read_csv(db_path + str(year) + '/lows_.csv', index_col=0)
 
+    idxs_.reset_index(drop=True, inplace=True)
     idxs_plt = px.line(idxs_, height=600)
+    logs_.reset_index(drop=True, inplace=True)
     logs_plt = px.line(logs_, height=400)
+    rets_.reset_index(drop=True, inplace=True)
     rets_plt = px.line(rets_, height=400)
+    vols_.reset_index(drop=True, inplace=True)
     vols_plt = px.line(vols_, height=400)
+    higs_.reset_index(drop=True, inplace=True)
     higs_plt = px.line(higs_, height=400)
+    lows_.reset_index(drop=True, inplace=True)
     lows_plt = px.line(lows_, height=400)
     
     return idxs_plt, logs_plt, rets_plt, vols_plt, higs_plt, lows_plt
