@@ -61,19 +61,20 @@ def volatility(df,rate=240,window=506):
 def ema(df: pd.Series, window: int):
     return df.ewm(alpha=1/window, adjust=False).mean()
 
-def atr(close: pd.DataFrame, low: pd.DataFrame, high: pd.DataFrame, window:int=14):
+def ema(df: pd.Series, window: int):
+    return df.ewm(alpha=1/window, adjust=False).mean()
+def atr(idxs: pd.DataFrame, low: pd.DataFrame, high: pd.DataFrame, window:int=14):
     data = pd.DataFrame([])
-    ccy_pairs = close.columns
-    for pair in ccy_pairs:
-        data[f'close_{pair}'] = close[pair]
-        data[f'high_{pair}'] = high[pair]
-        data[f'low_{pair}'] = low[pair]
-        data[f'tr0_{pair}'] = data[f'high_{pair}'] - data[f'low_{pair}']
-        data[f'tr1_{pair}'] = np.abs(data[f'high_{pair}'] - data[f'close_{pair}'].shift())
-        data[f'tr2_{pair}'] = np.abs(data[f'low_{pair}'] - data[f'close_{pair}'].shift())
-        data[f'tr_{pair}'] = data[[f'tr0_{pair}', f'tr1_{pair}', f'tr2_{pair}']].max(axis=1)
-        data[f'atr_{pair}'] = ema(data[f'tr_{pair}'], window)
-    data.dropna(inplace=True)
+    for currency in idxs.columns:
+        data[f'idxs_{currency}'] = idxs[currency]
+        data[f'high_{currency}'] = high[currency]
+        data[f'low_{currency}'] = low[currency]
+        data[f'tr0_{currency}'] = data[f'high_{currency}'] - data[f'low_{currency}']
+        data[f'tr1_{currency}'] = np.abs(data[f'high_{currency}'] - data[f'idxs_{currency}'].shift())
+        data[f'tr2_{currency}'] = np.abs(data[f'low_{currency}'] - data[f'idxs_{currency}'].shift())
+        data[f'tr_{currency}'] = data[[f'tr0_{currency}', f'tr1_{currency}', f'tr2_{currency}']].max(axis=1)
+        data[f'atr_{currency}'] = ema(data[f'tr_{currency}'], window)
+        data.drop(columns=[f'idxs_{currency}',f'tr0_{currency}',f'tr1_{currency}',f'tr2_{currency}',f'tr_{currency}'], inplace=True)
     return data
 
 
@@ -127,7 +128,3 @@ def rsi(df, periods = 240):
         data[f'{currency}_rsi'] = rsi
 
     return data
-
-
-
-
