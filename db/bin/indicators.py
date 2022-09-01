@@ -37,7 +37,7 @@ def get_bollinger_bands(df, rate=5, sigma_start=2, sigma_stop=2):
     return bol
 
 
-def bollinger_small(df, rate=5, sigma_start=2, sigma_stop=2):
+def bollinger_small(df, rate=24, sigma_start=2, sigma_stop=2):
 
     data = pd.DataFrame([])
     for currency in df.columns:
@@ -58,13 +58,11 @@ def volatility(df,rate=240,window=506):
     return data
 
 
-def ema(df: pd.Series, window: int):
-    return df.ewm(alpha=1/window, adjust=False).mean()
 
-def ema(df: pd.Series, window: int):
-    return df.ewm(alpha=1/window, adjust=False).mean()
+
 def atr(idxs: pd.DataFrame, low: pd.DataFrame, high: pd.DataFrame, window:int=14):
     data = pd.DataFrame([])
+
     for currency in idxs.columns:
         data[f'idxs_{currency}'] = idxs[currency]
         data[f'high_{currency}'] = high[currency]
@@ -73,7 +71,7 @@ def atr(idxs: pd.DataFrame, low: pd.DataFrame, high: pd.DataFrame, window:int=14
         data[f'tr1_{currency}'] = np.abs(data[f'high_{currency}'] - data[f'idxs_{currency}'].shift())
         data[f'tr2_{currency}'] = np.abs(data[f'low_{currency}'] - data[f'idxs_{currency}'].shift())
         data[f'tr_{currency}'] = data[[f'tr0_{currency}', f'tr1_{currency}', f'tr2_{currency}']].max(axis=1)
-        data[f'atr_{currency}'] = ema(data[f'tr_{currency}'], window)
+        data[f'atr_{currency}'] = data[f'tr_{currency}'].ewm(alpha=1/window, adjust=False).mean()
         data.drop(columns=[f'idxs_{currency}',f'tr0_{currency}',f'tr1_{currency}',f'tr2_{currency}',f'tr_{currency}'], inplace=True)
     return data
 
@@ -81,7 +79,7 @@ def atr(idxs: pd.DataFrame, low: pd.DataFrame, high: pd.DataFrame, window:int=14
 
 # TENDENCY INDICATORS
 
-def ema(df, window=14):
+def ema(df, window=48):
     """
     Exponential movint average
     """

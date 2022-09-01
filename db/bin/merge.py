@@ -20,7 +20,7 @@ def merge_db_data():
                 continue
             year_path = os.path.join(path, year_dir)
             for file in os.listdir(year_path):
-                file_path = os.path.join(year_path, file)
+                file_path = os.path.join(year_path, file)   
                 file_name = file.split(".")[0]
                 data = pd.read_csv(file_path, index_col=0)
                 merge[file_name] = pd.concat(
