@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from db.bin.data_tertiary import TertiaryData
+from data_tertiary import TertiaryData
 from indicators import rsi, ema, highpass_filter, lowpass_filter, time_standard
 from pathlib import Path
 
