@@ -9,7 +9,7 @@ from config import SYMBOLS
 def time_standard(df):
     # Spliting Datetime
     data = pd.DataFrame([])
-    data.index = df.index
+    data.index = pd.to_datetime(df.index)
 
     data["month_sin"] = np.sin((np.array(data.index.month)*math.pi*2)/12)
     data["month_cos"]=np.cos((np.array(data.index.month)*math.pi*2)/12)
