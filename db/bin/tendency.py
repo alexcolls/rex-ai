@@ -32,7 +32,6 @@ class TendencyFeatures(TertiaryData):
         s = sharpe_ratio(df=logs, window=24)
         print("\n### SHARPE RATIO ###")
 
-
         data = l.join(h)
         data = data.join(r)
         data = data.join(e)
