@@ -17,7 +17,6 @@ class TendencyFeatures(TertiaryData):
 
         print("Creating TENDENCY Data Set")
 
-
         logs = pd.read_csv(os.path.join(DATA_PATH, "tertiary", "logs_.csv"), index_col=0)
         logs_= pd.read_csv(os.path.join(DATA_PATH, "secondary", "logs_.csv"), index_col=0)
         time = time_standard(df=logs)
