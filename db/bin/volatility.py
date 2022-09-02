@@ -17,7 +17,7 @@ class VolatilityFeatures(TertiaryData):
         DATA_PATH_SECONDARY = os.path.normpath(
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "../", "data/merge/secondary")
         )
-        print(DATA_PATH_TERTIARY)
+        print(DATA_PATH_TERTIARY) 
         print("Creating Volatility Data Set")
 
         higs = pd.read_csv(os.path.join(DATA_PATH_TERTIARY, "higs_.csv"), index_col=0)
