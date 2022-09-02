@@ -75,11 +75,11 @@ def volatility(df,rate=240,window=506):
     return data
 
 
-def sharpe_ratio(df,rate=24):
+def sharpe_ratio(df, window=24):
 
     data = pd.DataFrame([])
     for currency in df.columns:
-        data[f'{currency}_sharpe'] = df[currency].rolling(rate).mean()/df[currency].rolling(rate).std()
+        data[f'{currency}_sharpe'] = df[currency].rolling(window).mean()/df[currency].rolling(window).std()
     data.index = df.index
 
     return data
