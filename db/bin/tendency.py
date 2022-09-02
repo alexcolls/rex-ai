@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from data_tertiary import TertiaryData
-from indicators import rsi, ema, highpass_filter, lowpass_filter, time_standard
+from indicators import rsi, ema, highpass_filter, lowpass_filter, time_standard, sharpe_ratio
 from pathlib import Path
 
 
@@ -25,10 +25,12 @@ class TendencyFeatures(TertiaryData):
         print("\n### HIGHPASS FILTERING ###")
         h = highpass_filter(df=logs)
         print("\n### CALCULATING RSI ###")
-        r = rsi(df=logs,periods=240)
+        r = rsi(df=logs,periods=60)
         print("\n### CALCULATING EMA ###")
-        e = ema(df=logs, window=48)
+        e = ema(df=logs, window=14)
         print("\n### TIME SCALING ###")
+        s = sharpe_ratio(df=logs, window=24)
+        print("\n### SHARPE RATIO ###")
 
 
         data = l.join(h)
@@ -36,13 +38,14 @@ class TendencyFeatures(TertiaryData):
         data = data.join(e)
         data = logs_.join(data)
         data = data.join(time, how="outer")
+        data = data.join(s)
 
         print("\n### CREATING tendency.csv ###")
         file_path = os.path.join(DATA_PATH, "tendency")
         Path(file_path).mkdir(parents=True, exist_ok=True)
         data.to_csv(os.path.join(file_path, "tendency.csv"))
 
-        return
+        return True
 
 
 if __name__ == "__main__":
