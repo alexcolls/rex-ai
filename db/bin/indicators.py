@@ -2,33 +2,14 @@ import pandas as pd
 import numpy as np
 import math
 import scipy.signal as sig
+from config import SYMBOLS
 
 
-# TIME SPLITING AND SCALIING (TRIGONOMETRICAL)
-# def time_standard(df):
-#     # Spliting Datetime
-#     data = pd.DataFrame([])
-#     data.index = pd.to_datetime(df.index)
-#     data["month_sin"] = np.sin((np.array(df.index.month)*math.pi*2)/12)
-#     data["month_cos"]=np.cos((np.array(df.index.month)*math.pi*2)/12)
-#     data["day_sin"] = np.sin((np.array(df.index.day_of_year)*math.pi*2)/360)
-#     data["day_cos"]=np.cos((np.array(df.index.day_of_year)*math.pi*2)/360)
-#     data["weekday_sin"] = np.sin((np.array(df.index.weekday)*math.pi*2)/7)
-#     data["weekday_cos"]=np.cos((np.array(df.index.weekday)*math.pi*2)/7)
-#     data["hour_sin"] = np.sin((np.array(df.index.hour)*math.pi*2)/24)
-#     data["hour_cos"]=np.cos((np.array(df.index.hour)*math.pi*2)/24)
-#     return data
 
 def time_standard(df):
     # Spliting Datetime
     data = pd.DataFrame([])
     data.index = df.index
-    data.index = pd.to_datetime(data.index)
-    data['month'] = data.index.month
-    data['day'] = data.index.day_of_year
-    data['weekday'] = data.index.weekday
-    data['hour'] = data.index.hour
-
 
     data["month_sin"] = np.sin((np.array(data.index.month)*math.pi*2)/12)
     data["month_cos"]=np.cos((np.array(data.index.month)*math.pi*2)/12)
@@ -39,9 +20,21 @@ def time_standard(df):
     data["hour_sin"] = np.sin((np.array(data.index.hour)*math.pi*2)/24)
     data["hour_cos"]=np.cos((np.array(data.index.hour)*math.pi*2)/24)
     data.index = df.index
-    data.drop(columns=['month', 'day','weekday','hour'], inplace=True)
+
     print(type(data.index))
     return data
+
+
+
+# CORRELATION BETWEEN PAIRS
+
+def correlations(df, rate=120):
+    data = pd.DataFrame([])
+    for sym in SYMBOLS:
+        data[f'{sym[:3]}_{sym[4:]}_corr'] = df[f'{sym[:3]}'].rolling(rate).corr(df[f'{sym[4:]}'])
+    data.index = df.index
+    return data
+
 
 
 # VOLATILITY INDICATORS
@@ -82,6 +75,14 @@ def volatility(df,rate=240,window=506):
     return data
 
 
+def sharpe_ratio(df,rate=24):
+
+    data = pd.DataFrame([])
+    for currency in df.columns:
+        data[f'{currency}_sharpe'] = df[currency].rolling(rate).mean()/df[currency].rolling(rate).std()
+    data.index = df.index
+
+    return data
 
 
 def atr(idxs: pd.DataFrame, low: pd.DataFrame, high: pd.DataFrame, window:int=14):

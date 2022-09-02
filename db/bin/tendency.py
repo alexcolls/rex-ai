@@ -36,7 +36,6 @@ class TendencyFeatures(TertiaryData):
         data = data.join(e)
         data = logs_.join(data)
         data = data.join(time, how="outer")
-        print(data.iloc[:,-10:])
 
         print("\n### CREATING tendency.csv ###")
         file_path = os.path.join(DATA_PATH, "tendency")
