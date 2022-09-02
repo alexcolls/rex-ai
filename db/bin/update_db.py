@@ -5,6 +5,8 @@ from data_primary import PrimaryData
 from data_secondary import SecondaryData
 from data_tertiary import TertiaryData
 from merge import merge_db_data
+from volatility import VolatilityFeatures
+from tendency import TendencyFeatures
 
 
 def updateDB():
@@ -33,5 +35,8 @@ def updateDB():
     merge_db_data()
 
 
+
 if __name__ == "__main__":
     updateDB()
+    TendencyFeatures.getTendency()
+    VolatilityFeatures.getVolatility()

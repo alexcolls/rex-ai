@@ -42,7 +42,7 @@ class VolatilityFeatures(TertiaryData):
         data = data.join(time)
 
         print("\n### CREATING volatility.csv ###")
-        file_path = os.path.join(DATA_PATH, "volatility")
+        file_path = os.path.join(DATA_PATH,"volatility")
         Path(file_path).mkdir(parents=True, exist_ok=True)
         data.to_csv(os.path.join(file_path, "volatility.csv"))
 
