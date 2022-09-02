@@ -1,32 +1,50 @@
-from curses import window
 import os
-import math
-from re import S
 import pandas as pd
-import numpy as np
-import scipy.signal as sig
-from db.bin.data_secondary import SecondaryData
 from db.bin.data_tertiary import TertiaryData
 from indicators import rsi, ema, highpass_filter, lowpass_filter, time_standard
+from pathlib import Path
 
 
 class TendencyFeatures(TertiaryData):
     def __init__(self):
         super().__init__()
 
-    def getVolatility(self):
+    def getTendency(self):
 
-        DATA_PATH = os.path.normpath(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "../", "data/merge/tertiary")
+        DATA_PATH= os.path.normpath(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "../","data/merge")
         )
 
-        higs = pd.read_csv(os.path.join(DATA_PATH, "high_.csv"), index_col=0)
-        lows = pd.read_csv(os.path.join(DATA_PATH, "lows_.csv"), index_col=0)
-        # idxs = pd.read_csv(os.path.join(DATA_PATH, "idxs_.csv"), index_col=0)
-        logs = pd.read_csv(os.path.join(DATA_PATH, "logs_.csv"), index_col=0)
-        # rets = pd.read_csv(os.path.join(DATA_PATH, "rets_.csv"), index_col=0)
+        print("Creating TENDENCY Data Set")
 
-        lowpass = lowpass_filter(df=logs)
-        highpass = highpass_filter(df=logs)
-        rsi = rsi(df=logs,window=240)
-        ema = ema(df=logs, window=48)
+        logs = pd.read_csv(os.path.join(DATA_PATH, "tertiary", "logs_.csv"), index_col=0)
+        logs_= pd.read_csv(os.path.join(DATA_PATH, "secondary", "logs_.csv"), index_col=0)
+        time = time_standard(df=logs)
+        print("\n### LOWPASS FILTERING ###")
+        l = lowpass_filter(df=logs)
+        print("\n### HIGHPASS FILTERING ###")
+        h = highpass_filter(df=logs)
+        print("\n### CALCULATING RSI ###")
+        r = rsi(df=logs,periods=240)
+        print("\n### CALCULATING EMA ###")
+        e = ema(df=logs, window=48)
+        print("\n### TIME SCALING ###")
+
+
+        data = l.join(h)
+        data = data.join(r)
+        data = data.join(e)
+        data = logs_.join(data)
+        data = data.join(time, how="outer")
+        print(data.iloc[:,-10:])
+
+        print("\n### CREATING tendency.csv ###")
+        file_path = os.path.join(DATA_PATH, "tendency")
+        Path(file_path).mkdir(parents=True, exist_ok=True)
+        data.to_csv(os.path.join(file_path, "tendency.csv"))
+
+        return
+
+
+if __name__ == "__main__":
+    TendencyFeatures().getTendency()

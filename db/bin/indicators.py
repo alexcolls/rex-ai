@@ -4,20 +4,44 @@ import math
 import scipy.signal as sig
 
 
-def time_standard(df:pd.DataFrame):
-    # Splitting Datetime
-    df.index = pd.to_datetime(df.index)
-    df["month_sin"] = np.sin((np.array(df.index.month)*math.pi*2)/12)
-    df["month_cos"]=np.cos((np.array(df.index.month)*math.pi*2)/12)
-    df["day_sin"] = np.sin((np.array(df.index.day_of_year)*math.pi*2)/360)
-    df["day_cos"]=np.cos((np.array(df.index.day_of_year)*math.pi*2)/360)
-    df["weekday_sin"] = np.sin((np.array(df.index.weekday)*math.pi*2)/7)
-    df["weekday_cos"]=np.cos((np.array(df.index.weekday)*math.pi*2)/7)
-    df["hour_sin"] = np.sin((np.array(df.index.hour)*math.pi*2)/24)
-    df["hour_cos"]=np.cos((np.array(df.index.hour)*math.pi*2)/24)
+# TIME SPLITING AND SCALIING (TRIGONOMETRICAL)
+# def time_standard(df):
+#     # Spliting Datetime
+#     data = pd.DataFrame([])
+#     data.index = pd.to_datetime(df.index)
+#     data["month_sin"] = np.sin((np.array(df.index.month)*math.pi*2)/12)
+#     data["month_cos"]=np.cos((np.array(df.index.month)*math.pi*2)/12)
+#     data["day_sin"] = np.sin((np.array(df.index.day_of_year)*math.pi*2)/360)
+#     data["day_cos"]=np.cos((np.array(df.index.day_of_year)*math.pi*2)/360)
+#     data["weekday_sin"] = np.sin((np.array(df.index.weekday)*math.pi*2)/7)
+#     data["weekday_cos"]=np.cos((np.array(df.index.weekday)*math.pi*2)/7)
+#     data["hour_sin"] = np.sin((np.array(df.index.hour)*math.pi*2)/24)
+#     data["hour_cos"]=np.cos((np.array(df.index.hour)*math.pi*2)/24)
+#     return data
 
-    return df
+def time_standard(df):
+    # Spliting Datetime
+    data = pd.DataFrame([])
+    data.index = df.index
+    data.index = pd.to_datetime(data.index)
+    data['month'] = data.index.month
+    data['day'] = data.index.day_of_year
+    data['weekday'] = data.index.weekday
+    data['hour'] = data.index.hour
 
+
+    data["month_sin"] = np.sin((np.array(data.index.month)*math.pi*2)/12)
+    data["month_cos"]=np.cos((np.array(data.index.month)*math.pi*2)/12)
+    data["day_sin"] = np.sin((np.array(data.index.day_of_year)*math.pi*2)/360)
+    data["day_cos"]=np.cos((np.array(data.index.day_of_year)*math.pi*2)/360)
+    data["weekday_sin"] = np.sin((np.array(data.index.weekday)*math.pi*2)/7)
+    data["weekday_cos"]=np.cos((np.array(data.index.weekday)*math.pi*2)/7)
+    data["hour_sin"] = np.sin((np.array(data.index.hour)*math.pi*2)/24)
+    data["hour_cos"]=np.cos((np.array(data.index.hour)*math.pi*2)/24)
+    data.index = df.index
+    data.drop(columns=['month', 'day','weekday','hour'], inplace=True)
+    print(type(data.index))
+    return data
 
 
 # VOLATILITY INDICATORS
