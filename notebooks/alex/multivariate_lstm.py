@@ -4,7 +4,9 @@ from numpy import hstack
 from keras.models import Sequential
 from keras.layers import LSTM
 from keras.layers import Dense
- 
+import pandas as pd
+import numpy as np
+
 # split a multivariate sequence into samples
 def split_sequences(sequences, n_steps):
 	X, y = list(), list()
@@ -19,6 +21,35 @@ def split_sequences(sequences, n_steps):
 		X.append(seq_x)
 		y.append(seq_y)
 	return array(X), array(y)
+
+
+# import y and prepare targets
+
+y = pd.read_csv(f'../../db/data/merge/secondary/logs_.csv', index_col=0)
+y.reset_index(inplace=True, drop=True)
+
+# converting logs to 3 states = ( 1, 0, -1 ) 
+def condition(x):
+    if x>0:
+        return 1
+    elif x<0:
+        return -1
+    else:
+        return 0
+
+for sym in y.columns:
+    y[sym] = y[sym].map( lambda x: condition(x) )
+
+y = y[1001:-50000]
+y.reset_index(inplace=True, drop=True)
+
+
+# import Xs and scale features
+X = pd.read_csv('../../db/data/merge/tendency/tendency.csv', index_col=0)
+X.reset_index(inplace=True, drop=True)
+X.replace([np.inf, -np.inf], 0, inplace=True)
+X = X[1000:-49999]
+
  
 # define input sequence
 in_seq1 = array([10, 20, 30, 40, 50, 60, 70, 80, 90])
@@ -34,7 +65,7 @@ out_seq = out_seq.reshape((len(out_seq), 1))
 dataset = hstack((in_seq1, in_seq2, out_seq))
 
 # choose a number of time steps
-n_steps = 3
+n_steps = 24
 
 # convert into input/output
 X, y = split_sequences(dataset, n_steps)
