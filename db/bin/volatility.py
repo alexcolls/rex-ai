@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from db.bin.data_tertiary import TertiaryData
-from indicators import bollinger_small, atr, time_standard
+from indicators import bollinger_small, atr, time_standard, correlations
 from pathlib import Path
 
 class VolatilityFeatures(TertiaryData):
@@ -29,16 +29,19 @@ class VolatilityFeatures(TertiaryData):
         # v = volatility(df=logs)
         print("\n### CALCULATING ATR ###")
         a = atr(idxs=idxs,low=lows,high=higs)
+        print("\n### CALCULATING CORRELATIONS ###")
+        c = correlations(df=logs)
         # s = sharpe_ratio(df=logs)
         print("\n### TIME SCALING ###")
         time = time_standard(df=logs)
-
         data = b.join(a)
+        data = data.join(b)
         # data = data.join(v)
         # data = data.join(s)
         data = logs_.join(data)
         data = data.join(time)
 
+        print("\n### CREATING tendency.csv ###")
         file_path = os.path.join(DATA_PATH, "volatility")
         Path(file_path).mkdir(parents=True, exist_ok=True)
         data.to_csv(os.path.join(file_path, "volatility.csv"))
