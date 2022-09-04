@@ -34,9 +34,10 @@ def updateDB():
     print("\n### MERGE DB DATA ###")
     merge_db_data()
 
+    TendencyFeatures.getTendency()
+    VolatilityFeatures.getVolatility()
+
 
 
 if __name__ == "__main__":
     updateDB()
-    TendencyFeatures.getTendency()
-    VolatilityFeatures.getVolatility()
