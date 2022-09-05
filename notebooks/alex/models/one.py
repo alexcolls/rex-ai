@@ -11,8 +11,8 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import OneHotEncoder
 from keras.callbacks import EarlyStopping
 
-EPOCHS = 10
-NEURONS = 100
+EPOCHS = 2
+NEURONS = 50
 TRAIN_YEAR = 2010
 VALID_YEAR = 2015
 TEST_YEAR = 2016
