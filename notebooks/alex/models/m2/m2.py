@@ -25,13 +25,15 @@ FINAL_YEAR = 2020
 DB_PATH = '../../../../db/data/'
 SYMBOLS = []
 
-def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=120 ):
+def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=120, load_SYMBOLS=False ):
 
     # load target
     y = pd.read_csv(DB_PATH+'merge/secondary/logs_.csv', index_col=0)
 
-    global SYMBOLS
-    SYMBOLS = y.columns
+    if load_SYMBOLS:
+        global SYMBOLS
+        SYMBOLS = y.columns
+        return True
 
     y.index = pd.to_datetime(y.index)
     y = y.replace([np.inf, -np.inf, np.nan], 0)
@@ -82,8 +84,11 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
         X[col], _ = scaleData(X[col])
 
     # make windows
-    def makeWindows ( data ):
-        pass
+    def makeWindows ( df, periods=lookback ):
+        for col in X.columns:
+            for row in X.index:
+                X[col][row] = X
+        
 
     X = X.to_numpy()
 
@@ -145,7 +150,7 @@ def trainModel ( X , y, symbol, epochs=EPOCHS):
 # main for function call.
 if __name__ == "__main__":
 
-    prepData('EUR_USD')
+    prepData('EUR_USD', load_SYMBOLS=True)
 
     for sym in SYMBOLS:
 
@@ -189,7 +194,4 @@ if __name__ == "__main__":
             print('\n')
 
 
-
-
-
-
+# END

@@ -25,13 +25,15 @@ FINAL_YEAR = 2020
 DB_PATH = '../../../../db/data/'
 SYMBOLS = []
 
-def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=120 ):
+def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=120, load_SYMBOLS=False ):
 
     # load target
     y = pd.read_csv(DB_PATH+'merge/secondary/logs_.csv', index_col=0)
 
-    global SYMBOLS
-    SYMBOLS = y.columns
+    if load_SYMBOLS:
+        global SYMBOLS
+        SYMBOLS = y.columns
+        return True
 
     y.index = pd.to_datetime(y.index)
     y = y.replace([np.inf, -np.inf, np.nan], 0)
@@ -81,8 +83,8 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
     for col in X.columns:
         X[col], _ = scaleData(X[col])
 
-    # make windows
-    def makeWindows ( data ):
+    # make windows TODO
+    def makeWindows ( data, periods=lookback ):
         pass
 
     X = X.to_numpy()
@@ -128,13 +130,13 @@ def plotHistory ( history ):
     plt.show()
 
 
-def trainModel ( X , y, epochs=EPOCHS):
+def trainModel ( X , y, symbol, epochs=EPOCHS):
 
     early_stopping = EarlyStopping(monitor='accuracy', patience=24, mode='min')
 
     history = model.fit(X , y, epochs=epochs, callbacks=[early_stopping])
 
-    model.save(__file__[:-3]+'_'+SYMBOL+'.h5')
+    model.save(__file__[:-3]+'_'+symbol+'.h5')
 
     plotHistory(history)
 
@@ -145,7 +147,7 @@ def trainModel ( X , y, epochs=EPOCHS):
 # main for function call.
 if __name__ == "__main__":
 
-    prepData('EUR_USD')
+    prepData('EUR_USD', load_SYMBOLS=True)
 
     for sym in SYMBOLS:
 
@@ -163,7 +165,7 @@ if __name__ == "__main__":
             model = prepModel(X_train , y_train)
 
             # fit model
-            history = trainModel(X_train, y_train)
+            history = trainModel(X_train, y_train, sym)
 
             print('\n')
             # test model
@@ -189,7 +191,4 @@ if __name__ == "__main__":
             print('\n')
 
 
-
-
-
-
+# END
