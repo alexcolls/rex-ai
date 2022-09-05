@@ -53,16 +53,7 @@ class OandaApi:
 
     # __ OandaApi.getCandles('EUR_USD', 'H1', '2022-01-01')
 
-    def getCandles(
-        self,
-        symbol,
-        timeframe,
-        start_date,
-        count=5000,
-        include_frist=False,
-        api_version="v3",
-        mids=True,
-    ):
+    def getCandles( self, symbol, timeframe, start_date, count=5000, include_frist=False, api_version="v3", mids=True ):
 
         prices = "M" if mids else "BA"  # Mids or BidAsks
 
