@@ -1,4 +1,5 @@
 
+import os.path
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
@@ -10,19 +11,28 @@ from pandas import Series
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import OneHotEncoder
 from keras.callbacks import EarlyStopping
+from keras import models
+import matplotlib.pyplot as plt
 
-EPOCHS = 2
-NEURONS = 50
+
+EPOCHS = 100
+NEURONS = 100
+THRESHOLD = 0.05
 TRAIN_YEAR = 2010
 VALID_YEAR = 2015
-TEST_YEAR = 2016
+TEST_YEAR = 2020
 FINAL_YEAR = 2020
-THRESHOLD = 0.05
+DB_PATH = '../../../../db/data/'
+SYMBOLS = []
 
-def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=0.05 ):
+def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=120 ):
 
     # load target
-    y = pd.read_csv(f'../../../db/data/merge/secondary/logs_.csv', index_col=0)
+    y = pd.read_csv(DB_PATH+'merge/secondary/logs_.csv', index_col=0)
+
+    global SYMBOLS
+    SYMBOLS = y.columns
+
     y.index = pd.to_datetime(y.index)
     y = y.replace([np.inf, -np.inf, np.nan], 0)
     y = y[symbol].loc[str(start_year)+'-01-01':str(final_year)+'-12-31']
@@ -36,13 +46,14 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=0.0
         else:
             return 0
     
-    y = y.map(lambda x: condition(x, THRESHOLD)).to_numpy()
+    y = y.map(lambda x: condition(x, threshold)).to_numpy()
 
     encoder = OneHotEncoder(sparse = False)
     y = encoder.fit_transform(y.reshape(-1,1))
 
+
     # load features
-    X = pd.read_csv(f'../../../db/data/merge/tendency/tendency.csv', index_col=0)
+    X = pd.read_csv(DB_PATH+'merge/tendency/tendency.csv', index_col=0)
     X.index = pd.to_datetime(X.index)
     X = X.loc[str(start_year)+'-01-01':str(final_year)+'-12-31']
     X = X.filter(regex=f'{symbol[:3]}|{symbol[4:]}|sin|cos')
@@ -70,7 +81,9 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=0.0
     for col in X.columns:
         X[col], _ = scaleData(X[col])
 
-    # make windows TODO
+    # make windows
+    def makeWindows ( data ):
+        pass
 
     X = X.to_numpy()
 
@@ -80,9 +93,6 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=0.0
 
     return y, X
 
-y_train, X_train = prepData('EUR_USD', TRAIN_YEAR, VALID_YEAR, THRESHOLD)
-y_val, X_val = prepData('EUR_USD', VALID_YEAR, TEST_YEAR-1, THRESHOLD)
-y_test, X_test = prepData('EUR_USD', TEST_YEAR, FINAL_YEAR, THRESHOLD)
 
 def prepModel(X , y, neurons=NEURONS):
 
@@ -96,20 +106,90 @@ def prepModel(X , y, neurons=NEURONS):
 
     return model
 
-model = prepModel(X_train , y_train)
 
-def trainModel( X , y, epochs=EPOCHS):
+def plotHistory ( history ):
+
+    # summarize history for accuracy
+    plt.plot(history.history['accuracy'])
+    #plt.plot(history.history['val_accuracy'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.show()
+
+    # summarize history for loss
+    plt.plot(history.history['loss'])
+    #plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.show()
+
+
+def trainModel ( X , y, epochs=EPOCHS):
 
     early_stopping = EarlyStopping(monitor='accuracy', patience=24, mode='min')
 
     history = model.fit(X , y, epochs=epochs, callbacks=[early_stopping])
 
-    model.save('one.h5')
+    model.save(__file__[:-3]+'_'+SYMBOL+'.h5')
+
+    plotHistory(history)
 
     return history 
 
-history = trainModel(X_train, y_train)
 
-results = model.evaluate(X_test, y_test, batch_size=128)
 
-print("test loss, test acc:", results)
+# main for function call.
+if __name__ == "__main__":
+
+    prepData('EUR_USD')
+
+    for sym in SYMBOLS:
+
+        print('\n',sym,'\n')
+
+        params = os.path.exists(__file__[:-3]+'_'+sym+'.h5')
+
+        # train model or load model
+        model = None
+        if not params:
+
+            y_train, X_train = prepData(sym, TRAIN_YEAR, VALID_YEAR)
+            y_test, X_test = prepData(sym, VALID_YEAR, TEST_YEAR)
+
+            model = prepModel(X_train , y_train)
+
+            # fit model
+            history = trainModel(X_train, y_train)
+
+            print('\n')
+            # test model
+            results = model.evaluate(X_test, y_test) # batch_size=128)
+
+            print('\n')
+            print('test loss:', round(results[0],2), 'test accuracy:', round(results[1],2))
+            print('\n')
+
+        else:
+
+            y_val, X_val = prepData(sym, VALID_YEAR, TEST_YEAR-1)
+            y_test, X_test = prepData(sym, TEST_YEAR, FINAL_YEAR)
+
+            model = models.load_model(__file__[:-3]+'_'+sym+'.h5')
+
+            results = model.evaluate(X_val, y_val)
+
+            print(results)
+
+            print('\n')
+            print('test loss:', round(results[0],2), 'test accuracy:', round(results[1],2))
+            print('\n')
+
+
+
+
+
+
