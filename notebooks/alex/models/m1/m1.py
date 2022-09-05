@@ -2,10 +2,9 @@
 import os.path
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
+from keras.layers import LSTM
 from keras.models import Sequential
 from keras.layers import Dense
-from keras.layers import LSTM
 from keras import layers
 from pandas import Series
 from sklearn.preprocessing import MinMaxScaler
@@ -24,6 +23,7 @@ TEST_YEAR = 2020
 FINAL_YEAR = 2020
 DB_PATH = '../../../../db/data/'
 SYMBOLS = []
+
 
 def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=120, load_SYMBOLS=False ):
 
@@ -138,8 +138,6 @@ def trainModel ( X , y, symbol, epochs=EPOCHS):
 
     model.save(__file__[:-3]+'_'+symbol+'.h5')
 
-    plotHistory(history)
-
     return history 
 
 
@@ -166,6 +164,8 @@ if __name__ == "__main__":
 
             # fit model
             history = trainModel(X_train, y_train, sym)
+
+            # plotHistory(history)
 
             print('\n')
             # test model
