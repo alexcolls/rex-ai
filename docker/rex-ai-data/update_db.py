@@ -19,8 +19,6 @@ def updateDB():
     primaryData.checkDB()
 
     if primaryData.missing_years:
-        # user confirmation
-        input("\nUpdate database?\n> Press Enter to proceed\n\n>>> ")
         primaryData.updateDB()
 
     print("\n### SECONDARY DB ###")
@@ -36,7 +34,6 @@ def updateDB():
 
     TendencyFeatures().getTendency()
     VolatilityFeatures().getVolatility()
-
 
 
 if __name__ == "__main__":
