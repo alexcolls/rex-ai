@@ -17,29 +17,29 @@ class TendencyFeatures(TertiaryData):
 
         print("Creating TENDENCY Data Set")
 
-        logs = pd.read_csv(os.path.join(DATA_PATH, "tertiary", "logs_.csv"), index_col=0)
-        logs_= pd.read_csv(os.path.join(DATA_PATH, "secondary", "logs_.csv"), index_col=0)
-        time = time_standard(df=logs)
-        print("\n### LOWPASS FILTERING ###")
-        l = lowpass_filter(df=logs)
-        print("\n### HIGHPASS FILTERING ###")
-        h = highpass_filter(df=logs)
-        print("\n### CALCULATING RSI ###")
-        r = rsi(df=logs,periods=60)
-        print("\n### CALCULATING EMA ###")
-        e = ema(df=logs, window=14)
-        print("\n### TIME SCALING ###")
-        s = sharpe_ratio(df=logs, window=24)
-        print("\n### SHARPE RATIO ###")
+        idxs = pd.read_csv(os.path.join(DATA_PATH, "tertiary", "idxs_.csv"), index_col=0)
+        idxs_= pd.read_csv(os.path.join(DATA_PATH, "secondary", "idxs_.csv"), index_col=0)
+        time = time_standard(df=idxs)
+
+        l = lowpass_filter(df=idxs)
+
+        h = highpass_filter(df=idxs)
+
+        r = rsi(df=idxs,periods=60)
+
+        e = ema(df=idxs, window=14)
+
+        s = sharpe_ratio(df=idxs, window=24)
+
 
         data = l.join(h)
         data = data.join(r)
         data = data.join(e)
         data = data.join(s)
-        data = logs_.join(data)
+        data = idxs_.join(data)
         data = data.join(time, how="outer")
 
-        print("\n### CREATING tendency.csv ###")
+
         file_path = os.path.join(DATA_PATH, "tendency")
         Path(file_path).mkdir(parents=True, exist_ok=True)
         data.to_csv(os.path.join(file_path, "tendency.csv"))
