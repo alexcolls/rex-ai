@@ -3,11 +3,20 @@
 
 Install & Run
 
+# clone
 > git clone https://github.com/quantium-rock/rex-ai
 
-> cd rex-ai/model
+# directory
+> cd rex-ai/
 
-> python3 run.py
+# install
+> python setup.py
+
+# update database
+> python db/bin/update_db.py
+
+# run program
+> python run.py
 
 ...follow terminal instructions
 

@@ -92,17 +92,36 @@ class PrimaryData:
         oanda_api = OandaApi()
 
         # current hour
-        now = str(datetime.utcnow())[:14]+'00:00.000000000Z'
+        now = datetime.utcnow()
 
-        # get all trading hours of the years in datetime list
-        dtimes = []
+        day_of_year = now.timetuple().tm_yday-1
+        current_hour = now.hour
+
         first_date = datetime(year, 1, 2)
         first_date = first_date.replace(tzinfo=timezone.utc)
-        for days in range(360):
-            today = first_date + timedelta(days=days)
-            if today.weekday() < 5:
-                for hour in range(24):
-                    dtimes.append(today + timedelta(hours=hour))
+
+        year_ = now.year
+        current_year = year == year_
+        dtimes = []
+
+        if not current_year:
+            # get all trading hours of full year in datetime list           
+            for day_ in range(360):
+                today = first_date + timedelta(days=day_)
+                if today.weekday() < 5:
+                    for hour_ in range(24):
+                        dtimes.append(today + timedelta(hours=hour_))
+        else:
+            # get only datetimes until now
+            for day_ in range(day_of_year):
+                today = first_date + timedelta(days=day_)
+                if today.weekday() < 5:
+                    if day_ == day_of_year:
+                        for hour_ in range(current_hour):
+                            dtimes.append(today + timedelta(hours=hour_))
+                    else:
+                        for hour_ in range(24):
+                            dtimes.append(today + timedelta(hours=hour_))
 
         # init daily dataframes indices for asks & bids
         op = pd.DataFrame(index=dtimes)
@@ -134,10 +153,6 @@ class PrimaryData:
 
                 # request 5000 bars from oanda rest-api
                 req = oanda_api.getCandles(symbol, self.timeframe, start_date)
-                try:
-                    if req[0]["time"] == now:
-                        break
-                except: pass
 
                 # iterate each candle
                 for x in req:
@@ -154,7 +169,7 @@ class PrimaryData:
                     data["close"].append(float(x["mid"]["c"]))
                     data["volume"].append(int(x["volume"]))
 
-                    # print(float(x['mid']['l']), x['time'])
+                    ## print(float(x['mid']['l']), x['time'])
 
                 if len(data["dtime"]) > 0:
                     # only for current year: check if there is no more history
