@@ -109,7 +109,7 @@ def ema(df, window=48):
     """
     data = pd.DataFrame([])
     for currency in df.columns:
-        data[f'{currency}_ema'] = df[currency].ewm(alpha=1/window, adjust=False).mean()
+        data[f'{currency}_ema{window}'] = df[currency].ewm(alpha=1/window, adjust=False).mean()
     data.index = df.index
 
     return data
@@ -147,6 +147,39 @@ def rsi(df, periods = 240):
         ema_down = down.ewm(com = periods - 1, adjust=True, min_periods = periods).mean()
         rs = ema_up / ema_down
         rsi = 100 - (100/(1 + rs))
-        data[f'{currency}_rsi'] = rsi
+        data[f'{currency}_rsi{periods}'] = rsi
+
+    return data
+
+def lowpass_momentum(df):
+
+    data = pd.DataFrame([])
+    low = lowpass_filter(df)
+    low2 = low.shift(1)
+    for currency in low.columns:
+        data[f'{currency}_hp_momentum'] = low2[currency] - low[currency]
+    data.index = df.index
+    data.fillna(0)
+    return data
+
+def highpass_momentum(df):
+
+    data = pd.DataFrame([])
+    high = highpass_filter(df)
+    high2 = high.shift(1)
+    for currency in high.columns:
+        data[f'{currency}_hp_momentum'] = high2[currency] - high[currency]
+    data.index = df.index
+    data.fillna(0, inplace=True)
+    return data
+
+
+def ema_diff(df, window=8):
+    data = pd.DataFrame([])
+
+    for currency in df.columns:
+        data[f'{currency}_ema{window}_diff'] = df[currency].ewm(alpha=1/window, adjust=False).mean() - df[currency]
+    data.index = df.index
+    data.fillna(0, inplace=True)
 
     return data
