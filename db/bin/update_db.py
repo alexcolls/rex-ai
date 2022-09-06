@@ -15,6 +15,8 @@ def updateDB():
     secondaryData = SecondaryData()
     tertiaryData = TertiaryData()
 
+    primaryData.deleteFolder("primary", "2022")
+
     print("\n### PRIMARY DB ###")
     primaryData.checkDB()
 
@@ -36,7 +38,6 @@ def updateDB():
 
     TendencyFeatures().getTendency()
     VolatilityFeatures().getVolatility()
-
 
 
 if __name__ == "__main__":

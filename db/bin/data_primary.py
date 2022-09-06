@@ -20,7 +20,7 @@ import time
 class PrimaryData:
 
     ## class constructor
-    def __init__(self, symbols=SYMBOLS, timeframe=TIMEFRAME, start_year=2005):
+    def __init__(self, symbols=SYMBOLS, timeframe=TIMEFRAME, start_year=2009):
 
         # quotes granularity default=5_second_bars
         self.symbols = symbols
@@ -53,6 +53,30 @@ class PrimaryData:
         )
 
         return True
+
+    def deleteFolder(self, parent: str, year: str) -> None:
+        import shutil
+
+        PATH_2022 = os.path.normpath(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "../",
+                "data",
+                parent,
+                year,
+            )
+        )
+
+        PATH_MERGE = os.path.normpath(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "../", "data", "merge"
+            )
+        )
+
+        shutil.rmtree(PATH_2022, ignore_errors=True)
+        shutil.rmtree(PATH_MERGE, ignore_errors=True)
+        print("Deleted 2022 and merge directories to update from scratch")
+        return
 
     ## check missing years in db/data/
     def checkDB(self):
@@ -153,6 +177,14 @@ class PrimaryData:
 
                 # request 5000 bars from oanda rest-api
                 req = oanda_api.getCandles(symbol, self.timeframe, start_date)
+<<<<<<< HEAD
+=======
+                try:
+                    if req[0]["time"] == now:
+                        break
+                except:
+                    pass
+>>>>>>> 904e618a09de5f44fee65b41ed7410b8020a389f
 
                 # iterate each candle
                 for x in req:
@@ -195,11 +227,11 @@ class PrimaryData:
             _vo = pd.DataFrame(data["volume"], index=data["dtime"], columns=[symbol])
             _vo.index = pd.to_datetime(_vo.index, utc=True)
 
-            op = pd.merge(op, _op, how='left', left_index=True, right_index=True)
-            hi = pd.merge(hi, _hi, how='left', left_index=True, right_index=True)
-            lo = pd.merge(lo, _lo, how='left', left_index=True, right_index=True)
-            cl = pd.merge(cl, _cl, how='left', left_index=True, right_index=True)
-            vo = pd.merge(vo, _vo, how='left', left_index=True, right_index=True)
+            op = pd.merge(op, _op, how="left", left_index=True, right_index=True)
+            hi = pd.merge(hi, _hi, how="left", left_index=True, right_index=True)
+            lo = pd.merge(lo, _lo, how="left", left_index=True, right_index=True)
+            cl = pd.merge(cl, _cl, how="left", left_index=True, right_index=True)
+            vo = pd.merge(vo, _vo, how="left", left_index=True, right_index=True)
 
             # realese memory
             del data, _op, _hi, _lo, _cl, _vo

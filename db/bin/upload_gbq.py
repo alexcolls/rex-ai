@@ -1,8 +1,7 @@
 import os
 import time
 import pandas as pd
-from datetime import datetime
-from pytz import UTC
+from datetime import datetime, timezone
 from google.cloud import bigquery
 
 PROJECT = "artful-talon-355716"
@@ -32,6 +31,15 @@ def upload_data():
         path = os.path.join(DATA_PATH, d)
 
         # Check last data available on GBQ
+        query = """
+            SELECT DATE_TIME
+            FROM `artful-talon-355716.rex_ai.tendency`
+            ORDER BY DATE_TIME DESC
+            LIMIT 1
+        """
+        query_job = client.query(query)
+        print(query_job)
+        print(" ")
 
         for file in os.listdir(path):
 
@@ -40,8 +48,10 @@ def upload_data():
             data = pd.read_csv(os.path.join(path, file), index_col=0)
             data.index = pd.to_datetime(data.index)
             data.index.name = "DATE_TIME"
-            FIRST_VALID_DAY = datetime(2010, 1, 1, 0, 0, 0, 0, UTC)
-            data = data.loc[FIRST_VALID_DAY:]
+            FIRST_VALID_HOUR = datetime(2010, 1, 1, 0, 0, 0, 0, timezone.utc)
+            LAST_VALID_HOUR = datetime.now(timezone.utc)
+            print(FIRST_VALID_HOUR, LAST_VALID_HOUR)
+            data = data.loc[FIRST_VALID_HOUR:LAST_VALID_HOUR]
 
             try:
                 job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
@@ -52,7 +62,9 @@ def upload_data():
             except Exception as e:
                 print(e)
 
-            print(f"Uploaded {file} in {round(time.time() - start_time, 2)}s\t\t")
+            print(
+                f"Uploaded {file} in {round(time.time() - start_time, 2)}s            "
+            )
 
     return
 
