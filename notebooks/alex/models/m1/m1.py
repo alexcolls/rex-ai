@@ -19,7 +19,7 @@ NEURONS = 100
 THRESHOLD = 0.05
 TRAIN_YEAR = 2010
 VALID_YEAR = 2015
-TEST_YEAR = 2020
+TEST_YEAR = 2016
 FINAL_YEAR = 2020
 DB_PATH = '../../../../db/data/'
 SYMBOLS = []
@@ -99,9 +99,10 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
 def prepModel(X , y, neurons=NEURONS):
 
     model = Sequential()
-    model.add(LSTM(neurons, activation='relu', input_shape=(X.shape[1], 1)))
+    model.add(LSTM(neurons, activation='tanh', input_shape=(X.shape[1], 1)))
     model.add(layers.Dropout(0.2))
-    model.add(layers.Dense(neurons , activation='relu'))
+    model.add(layers.Dense(neurons , activation='tanh'))
+    model.add(layers.Dropout(0.2))
     model.add(Dense(y.shape[-1], activation='softmax',))
     model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
     model.summary()
@@ -132,7 +133,7 @@ def plotHistory ( history ):
 
 def trainModel ( X , y, symbol, epochs=EPOCHS):
 
-    early_stopping = EarlyStopping(monitor='accuracy', patience=24, mode='min')
+    early_stopping = EarlyStopping(monitor='accuracy', patience=2, mode='min')
 
     history = model.fit(X , y, epochs=epochs, callbacks=[early_stopping])
 
