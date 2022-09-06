@@ -8,13 +8,14 @@ def merge_db_data():
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "../", "data")
     )
 
-    dirs = ["primary", "secondary", "tertiary"]
+    dirs = ["secondary", "tertiary"]
 
     for d in dirs:
         print(f"Process {d} data:")
         path = os.path.join(DATA_PATH, d)
-        if len(os.listdir(path)) != 0:
-            print(f"Directory {path} is not empty. Skipping.")
+        file_path = os.path.join(DATA_PATH, "merge", d)
+        if os.path.isdir(file_path):
+            print(f"Directory {file_path} is not empty. Skipping.")
             continue
         merge = {}
         for year_dir in sorted(os.listdir(path)):
