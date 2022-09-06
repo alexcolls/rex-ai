@@ -12,14 +12,17 @@ def merge_db_data():
 
     for d in dirs:
         print(f"Process {d} data:")
-        merge = {}
         path = os.path.join(DATA_PATH, d)
+        if len(os.listdir(path)) != 0:
+            print(f"Directory {path} is not empty. Skipping.")
+            continue
+        merge = {}
         for year_dir in sorted(os.listdir(path)):
             if "." in year_dir:
                 continue
             year_path = os.path.join(path, year_dir)
             for file in os.listdir(year_path):
-                file_path = os.path.join(year_path, file)   
+                file_path = os.path.join(year_path, file)
                 file_name = file.split(".")[0]
                 data = pd.read_csv(file_path, index_col=0)
                 merge[file_name] = pd.concat(
