@@ -177,14 +177,6 @@ class PrimaryData:
 
                 # request 5000 bars from oanda rest-api
                 req = oanda_api.getCandles(symbol, self.timeframe, start_date)
-<<<<<<< HEAD
-=======
-                try:
-                    if req[0]["time"] == now:
-                        break
-                except:
-                    pass
->>>>>>> 904e618a09de5f44fee65b41ed7410b8020a389f
 
                 # iterate each candle
                 for x in req:
