@@ -35,7 +35,7 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
     if load_SYMBOLS:
         global SYMBOLS
         SYMBOLS = y.columns
-        return True
+        return 0
 
     y.index = pd.to_datetime(y.index)
     y = y.replace([np.inf, -np.inf, np.nan], 0)
@@ -113,8 +113,8 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
     X = X.to_numpy()
 
     # cut first loockback periods
-    X = X[lookback:]
-    y = y[lookback:]
+    X = X[lookback+1:]
+    y = y[lookback+1:]
 
     # shift 1 X and y (current data to predict next period)
     y = y[:-1]
@@ -147,6 +147,8 @@ def buildModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
     model.add( Dense(y.shape[-1], activation='softmax',) )
 
     model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+
+    print('\n')
 
     model.summary()
 
@@ -186,6 +188,7 @@ def plotHistory ( history ):
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
 
+    return 0
 
 
 # main for function call.
