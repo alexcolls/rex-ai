@@ -35,15 +35,15 @@ class VolatilityFeatures(TertiaryData):
             os.path.join(DATA_PATH, "secondary", "logs_.csv"), index_col=0
         )
 
-        print("\n### BOLINGER BANDS ###")
+
         b = bollinger_small(df=logs, rate=48)
         # v = volatility(df=logs)
-        print("\n### CALCULATING ATR ###")
+
         a = atr(idxs=idxs, low=lows, high=higs)
-        print("\n### CALCULATING CORRELATIONS ###")
+
         c = correlations(df=logs)
         # s = sharpe_ratio(df=logs)
-        print("\n### TIME SCALING ###")
+
         time = time_standard(df=logs)
         data = b.join(a)
         data = data.join(c)
@@ -52,7 +52,7 @@ class VolatilityFeatures(TertiaryData):
         data = logs_.join(data)
         data = data.join(time)
 
-        print("\n### CREATING volatility.csv ###")
+
         file_path = os.path.join(DATA_PATH, "volatility")
         Path(file_path).mkdir(parents=True, exist_ok=True)
         data.to_csv(os.path.join(file_path, "volatility.csv"))

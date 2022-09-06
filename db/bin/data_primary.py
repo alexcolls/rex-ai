@@ -91,6 +91,9 @@ class PrimaryData:
 
         oanda_api = OandaApi()
 
+        # current hour
+        now = str(datetime.utcnow())[:14]+'00:00.000000000Z'
+
         # get all trading hours of the years in datetime list
         dtimes = []
         first_date = datetime(year, 1, 2)
@@ -131,6 +134,8 @@ class PrimaryData:
 
                 # request 5000 bars from oanda rest-api
                 req = oanda_api.getCandles(symbol, self.timeframe, start_date)
+                if req[0]["time"] == now:
+                    break
 
                 # iterate each candle
                 for x in req:
