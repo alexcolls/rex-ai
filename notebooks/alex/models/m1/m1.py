@@ -27,7 +27,8 @@ SYMBOLS = []
 
 def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=120, load_SYMBOLS=False ):
 
-    # load target
+    ### TARGET ###
+
     y = pd.read_csv(DB_PATH+'merge/secondary/logs_.csv', index_col=0)
 
     if load_SYMBOLS:
@@ -53,17 +54,21 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
     encoder = OneHotEncoder(sparse = False)
     y = encoder.fit_transform(y.reshape(-1,1))
 
+    ### FEATURES ###
 
     # load features
     X = pd.read_csv(DB_PATH+'merge/tendency/tendency.csv', index_col=0)
     X.index = pd.to_datetime(X.index)
     X = X.loc[str(start_year)+'-01-01':str(final_year)+'-12-31']
-    X = X.filter(regex=f'{symbol[:3]}|{symbol[4:]}|sin|cos')
-    X = X.replace([np.inf, -np.inf, np.nan], 0)
+    
+    # substract infinites and fill nans
+    X.replace([np.inf, -np.inf], np.nan, inplace=True)
+    X.fillna(method='bfill', inplace=True)
+    X.fillna(method='ffill', inplace=True)
 
     # scaling features
     def scaleData ( x ):
-        
+
         x_ = pd.Series(x.copy())
         x_ = x_.values
         x_ = x_.reshape((len(x_), 1))
@@ -80,8 +85,8 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
     for col in X.columns:
         X[col], _ = scaleData(X[col])
 
-    # make windows TODO
-    def makeWindows ( data, periods=lookback ):
+    # make sequences TODO
+    def makeSequences ( data, periods=lookback ):
         pass
 
     X = X.to_numpy()
@@ -93,7 +98,7 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
     return y, X
 
 
-def prepModel(X , y, neurons=NEURONS):
+def buildModel ( X , y, neurons=NEURONS ):
 
     model = Sequential()
     model.add(LSTM(neurons, activation='tanh', input_shape=(X.shape[1], 1)))
@@ -105,6 +110,17 @@ def prepModel(X , y, neurons=NEURONS):
     model.summary()
 
     return model
+
+
+def trainModel ( X , y, symbol, epochs=EPOCHS):
+
+    early_stopping = EarlyStopping(monitor='accuracy', patience=10, mode='min')
+
+    history = model.fit(X , y, epochs=epochs, callbacks=[early_stopping])
+
+    model.save(__file__[:-3]+'_'+symbol+'.h5')
+
+    return history 
 
 
 def plotHistory ( history ):
@@ -127,17 +143,7 @@ def plotHistory ( history ):
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
 
-
-def trainModel ( X , y, symbol, epochs=EPOCHS):
-
-    early_stopping = EarlyStopping(monitor='accuracy', patience=2, mode='min')
-
-    history = model.fit(X , y, epochs=epochs, callbacks=[early_stopping])
-
-    model.save(__file__[:-3]+'_'+symbol+'.h5')
-
-    return history 
-
+    return 0
 
 
 # main for function call.
@@ -158,7 +164,7 @@ if __name__ == "__main__":
             y_train, X_train = prepData(sym, TRAIN_YEAR, VALID_YEAR-1)
             y_test, X_test = prepData(sym, VALID_YEAR, VALID_YEAR)
 
-            model = prepModel(X_train , y_train)
+            model = buildModel(X_train , y_train)
 
             # fit model
             history = trainModel(X_train, y_train, sym)
