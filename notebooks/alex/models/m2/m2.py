@@ -94,16 +94,15 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
     # make sequences
     def makeSequences( x, lookback=lookback ):
 
+        x_ = x.to_numpy()
         out_ = []
-        for i in range(len(x)):
+        for i in range(len(x_)):
             seq = 0
             try:
-                seq = np.array(x.iloc[ i : i-lookback ])
+                seq = x_[ i-lookback : i ]
             except: 
                 pass
             out_.append(seq)
-
-        out_ = np.array(out_, dtype="object")
         
         return out_
 
@@ -209,7 +208,7 @@ if __name__ == "__main__":
 
             print('\n> Loading and preprocessing data... be patient..')
             # loading and preparing data
-            y_train, X_train = prepData(sym, TRAIN_YEAR, VALID_YEAR)
+            y_train, X_train = prepData(sym, TRAIN_YEAR, VALID_YEAR-1)
             y_test, X_test = prepData(sym, VALID_YEAR, VALID_YEAR)
 
             print(y_train.shape, X_train.shape)
