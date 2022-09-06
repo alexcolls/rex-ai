@@ -17,15 +17,15 @@ import matplotlib.pyplot as plt
 EPOCHS = 100
 NEURONS = 100
 THRESHOLD = 0.05
-TRAIN_YEAR = 2010
-VALID_YEAR = 2015
+TRAIN_YEAR = 2018
+VALID_YEAR = 2021
 TEST_YEAR = 2020
 FINAL_YEAR = 2020
 DB_PATH = '../../../../db/data/'
 SYMBOLS = []
 
 
-def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=120, load_SYMBOLS=False ):
+def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=120, load_SYMBOLS=False ):
 
     # load target
     y = pd.read_csv(DB_PATH+'merge/secondary/logs_.csv', index_col=0)
@@ -52,7 +52,6 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
 
     encoder = OneHotEncoder(sparse = False)
     y = encoder.fit_transform(y.reshape(-1,1))
-
 
     # load features
     X = pd.read_csv(DB_PATH+'merge/tendency/tendency.csv', index_col=0)
@@ -84,12 +83,17 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
         X[col], _ = scaleData(X[col])
 
     # make windows
-    def makeWindows ( df, periods=lookback ):
-        for col in X.columns:
-            for row in X.index:
-                X[col][row] = X
+    def makeWindows ( x, periods=lookback ):
+        df = x.copy()
+        for col in df.columns:
+            for i, row in enumerate(df.index):
+                try:
+                    df[col][row] = list(df.iloc[i-periods:i])
+                except:
+                    df[col][row] = 0
+        return df
         
-
+    X = makeWindows(X)
     X = X.to_numpy()
 
     # shift 1 X and y
@@ -135,7 +139,7 @@ def plotHistory ( history ):
 
 def trainModel ( X , y, symbol, epochs=EPOCHS):
 
-    early_stopping = EarlyStopping(monitor='accuracy', patience=24, mode='min')
+    early_stopping = EarlyStopping(monitor='accuracy', patience=2, mode='min')
 
     history = model.fit(X , y, epochs=epochs, callbacks=[early_stopping])
 
@@ -157,11 +161,12 @@ if __name__ == "__main__":
         print('\n',sym,'\n')
 
         params = os.path.exists(__file__[:-3]+'_'+sym+'.h5')
-
         # train model or load model
         model = None
         if not params:
 
+            print('\n> Loading and preprocessing data...')
+            # loading and preparing data
             y_train, X_train = prepData(sym, TRAIN_YEAR, VALID_YEAR)
             y_test, X_test = prepData(sym, VALID_YEAR, TEST_YEAR)
 
