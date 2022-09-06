@@ -5,12 +5,11 @@ import pandas as pd
 from keras.layers import LSTM
 from keras.models import Sequential
 from keras.layers import Dense
-from keras import layers
-from pandas import Series
+from keras.layers import Dropout
+from keras.callbacks import EarlyStopping
+from keras.models import load_model
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
-from keras.callbacks import EarlyStopping
-from keras import models
 import matplotlib.pyplot as plt
 
 # LSTM model parameters
@@ -124,30 +123,47 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
     return y, X
 
 
-def loadModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
+def buildModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
+
+    print('\n> Building the LSTM model')
 
     neurons = int( neurons * ( 1 + dropout ) + 1 )
 
-    print('\n', neurons, 'neurons...')
+    print('\nwith', neurons, 'neurons')
+    print('\nand', layers, 'layers')
+    print('\ndropout:', dropout)
 
     model = Sequential()
 
-    model.add(LSTM(neurons, activation='relu', return_sequences=False, input_shape=(X.shape[1], 1)))
-    model.add(layers.Dropout(dropout))
+    model.add( LSTM(neurons, activation='relu', return_sequences=False, input_shape=(X.shape[1], 1)) )
 
-    print('\n', layers, 'layers...')
+    model.add( Dropout(dropout) )
 
-    for i in range(layers):
-        model.add(layers.Dense(neurons , activation='relu'))
-        model.add(layers.Dropout(dropout))
+    for _ in range(layers):
+        model.add( Dense(neurons , activation='relu') )
+        model.add( Dropout(dropout) )
 
-    model.add(Dense(y.shape[-1], activation='softmax',))
+    # final prediction
+    model.add( Dense(y.shape[-1], activation='softmax',) )
 
     model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 
     model.summary()
 
     return model
+
+
+def trainModel ( X , y, symbol, epochs=EPOCHS):
+
+    early_stopping = EarlyStopping(monitor='accuracy', patience=2, mode='min')
+
+    history = model.fit(X , y, epochs=epochs, callbacks=[early_stopping])
+
+    model.save(__file__[:-3]+'_'+symbol+'.h5')
+
+    plotHistory(history)
+
+    return history 
 
 
 def plotHistory ( history ):
@@ -171,19 +187,6 @@ def plotHistory ( history ):
     plt.show()
 
 
-def trainModel ( X , y, symbol, epochs=EPOCHS):
-
-    early_stopping = EarlyStopping(monitor='accuracy', patience=2, mode='min')
-
-    history = model.fit(X , y, epochs=epochs, callbacks=[early_stopping])
-
-    model.save(__file__[:-3]+'_'+symbol+'.h5')
-
-    plotHistory(history)
-
-    return history 
-
-
 
 # main for function call.
 if __name__ == "__main__":
@@ -204,7 +207,7 @@ if __name__ == "__main__":
             y_train, X_train = prepData(sym, TRAIN_YEAR, VALID_YEAR)
             y_test, X_test = prepData(sym, VALID_YEAR, TEST_YEAR)
 
-            model = loadModel(X_train , y_train)
+            model = buildModel(X_train , y_train)
 
             # fit model
             history = trainModel(X_train, y_train, sym)
@@ -222,7 +225,7 @@ if __name__ == "__main__":
             y_val, X_val = prepData(sym, VALID_YEAR, TEST_YEAR-1)
             y_test, X_test = prepData(sym, TEST_YEAR, FINAL_YEAR)
 
-            model = models.load_model(__file__[:-3]+'_'+sym+'.h5')
+            model = load_model(__file__[:-3]+'_'+sym+'.h5')
 
             results = model.evaluate(X_val, y_val)
 
