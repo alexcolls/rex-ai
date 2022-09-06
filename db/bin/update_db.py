@@ -33,12 +33,21 @@ def updateDB():
     tertiaryData.checkDB()
     tertiaryData.updateDB()
 
+    print("\nPrimary, Secondary & Tertiary DB up to date!")
+    input("\nDo you wanna merge db's?\n> Press Enter to proceed\n\n>>> ")
+
     print("\n### MERGE DB DATA ###")
     merge_db_data()
+
+    print("\nDB's merged successfully.")
+    input("\nDo you update indicators?\n> Press Enter to proceed\n\n>>> ")
 
     TendencyFeatures().getTendency()
     VolatilityFeatures().getVolatility()
 
+    print("\nYour DB is up to date. Bye!\n")
+
+# updateDB()
 
 if __name__ == "__main__":
     updateDB()
