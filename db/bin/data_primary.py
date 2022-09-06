@@ -140,8 +140,8 @@ class PrimaryData:
             for day_ in range(day_of_year):
                 today = first_date + timedelta(days=day_)
                 if today.weekday() < 5:
-                    if day_ == day_of_year:
-                        for hour_ in range(current_hour):
+                    if day_ == day_of_year-1:
+                        for hour_ in range(current_hour+1):
                             dtimes.append(today + timedelta(hours=hour_))
                     else:
                         for hour_ in range(24):
