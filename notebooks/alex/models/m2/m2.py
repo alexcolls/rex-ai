@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 # LSTM model parameters
 LAYERS = 3
 NEURONS = 144
+LOOKBACK = 120
 EPOCHS = 100
 THRESHOLD = 0.05
 TRAIN_YEAR = 2018
@@ -25,7 +26,7 @@ DB_PATH = '../../../../db/data/'
 SYMBOLS = []
 
 
-def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=120, load_SYMBOLS=False ):
+def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=LOOKBACK, load_SYMBOLS=False ):
 
     ### TARGETS ###
 
@@ -104,7 +105,7 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
                 pass
             out_.append(seq)
         
-        return out_
+        return np.array(out_)
 
     for col in X.columns:
         X[col] = makeSequences(X[col])
@@ -156,15 +157,15 @@ def buildModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
     return model
 
 
-def trainModel ( X , y, symbol, epochs=EPOCHS):
+def trainModel ( model, X, y, symbol, epochs=EPOCHS, plot=False):
 
     early_stopping = EarlyStopping(monitor='accuracy', patience=2, mode='min')
 
-    history = model.fit(X , y, epochs=epochs, callbacks=[early_stopping])
+    history = model.fit(X, y, epochs=epochs, batch_size=LOOKBACK, callbacks=[early_stopping], verbose=2)
 
     model.save(__file__[:-3]+'_'+symbol+'.h5')
 
-    plotHistory(history)
+    if plot: plotHistory(history)
 
     return history 
 
@@ -206,21 +207,21 @@ if __name__ == "__main__":
         model = None
         if not params:
 
-            print('\n> Loading and preprocessing data... be patient..')
+            print('\n> Loading and preprocessing data...\n')
             # loading and preparing data
             y_train, X_train = prepData(sym, TRAIN_YEAR, VALID_YEAR-1)
-            y_test, X_test = prepData(sym, VALID_YEAR, VALID_YEAR)
+            y_valid, X_valid = prepData(sym, VALID_YEAR, VALID_YEAR)
 
             print(y_train.shape, X_train.shape)
 
             model = buildModel(X_train , y_train)
 
             # fit model
-            history = trainModel(X_train, y_train, sym)
+            history = trainModel(model, X_train, y_train, sym)
 
             print('\n')
             # test model
-            results = model.evaluate(X_test, y_test) # batch_size=128)
+            results = model.evaluate(X_valid, y_valid, batch_size=LOOKBACK)
 
             print('\n')
             print('test loss:', round(results[0],2), 'test accuracy:', round(results[1],2))

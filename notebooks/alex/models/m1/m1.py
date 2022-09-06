@@ -7,7 +7,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras import layers
 from pandas import Series
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from keras.callbacks import EarlyStopping
 from keras import models
@@ -15,12 +15,12 @@ import matplotlib.pyplot as plt
 
 
 EPOCHS = 100
-NEURONS = 100
+NEURONS = 200
 THRESHOLD = 0.05
-TRAIN_YEAR = 2010
-VALID_YEAR = 2015
-TEST_YEAR = 2016
-FINAL_YEAR = 2020
+TRAIN_YEAR = 2018
+VALID_YEAR = 2021
+TEST_YEAR = 2021
+FINAL_YEAR = 2022
 DB_PATH = '../../../../db/data/'
 SYMBOLS = []
 
@@ -62,22 +62,19 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
     X = X.replace([np.inf, -np.inf, np.nan], 0)
 
     # scaling features
-    def scaleData ( data ):
-        series = Series(data)
-        # prepare data for normalization
-        values = series.values
-        values = values.reshape((len(values), 1))
-        # train the normalization
-        scaler = MinMaxScaler(feature_range=(-1, 1))
-        scaler = scaler.fit(values)
+    def scaleData ( x ):
+        
+        x_ = pd.Series(x.copy())
+        x_ = x_.values
+        x_ = x_.reshape((len(x_), 1))
+        # standard scaler
+        scaler = StandardScaler()
+        scaler = scaler.fit(x_)
         #print('Min: %f, Max: %f' % (scaler.data_min_, scaler.data_max_))
-        # normalize the dataset and print
-        normalized = scaler.transform(values)
+        normalized = scaler.transform(x_)
         #print(normalized)
-        # inverse transform and print
-        inversed = scaler.inverse_transform(normalized)
+        inversed = scaler.inverse_transform(x_)
         #print(inversed)
-
         return normalized, inversed
 
     for col in X.columns:
@@ -158,8 +155,8 @@ if __name__ == "__main__":
         model = None
         if not params:
 
-            y_train, X_train = prepData(sym, TRAIN_YEAR, VALID_YEAR)
-            y_test, X_test = prepData(sym, VALID_YEAR, TEST_YEAR)
+            y_train, X_train = prepData(sym, TRAIN_YEAR, VALID_YEAR-1)
+            y_test, X_test = prepData(sym, VALID_YEAR, VALID_YEAR)
 
             model = prepModel(X_train , y_train)
 
