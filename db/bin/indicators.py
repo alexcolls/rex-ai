@@ -121,7 +121,7 @@ def highpass_filter(df, order=5, cutoff=0.2):
     data = pd.DataFrame([])
     b, a = sig.butter(N=order, Wn=cutoff, btype='highpass', analog=False)
     for currency in df.columns:
-        data[f'{currency}_high'] = sig.lfilter(b, a, df[currency])
+        data[f'{currency}_highpass'] = sig.lfilter(b, a, df[currency])
     data.index = df.index
 
     return data
@@ -131,7 +131,7 @@ def lowpass_filter(df, order=8, cutoff=0.2):
     data = pd.DataFrame([])
     b, a = sig.butter(N=order, Wn=cutoff, btype='lowpass', analog=False)
     for currency in df.columns:
-        data[f'{currency}_low'] = sig.lfilter(b, a, df[currency])
+        data[f'{currency}_lowpass'] = sig.lfilter(b, a, df[currency])
     data.index = df.index
 
     return data
