@@ -63,7 +63,7 @@ class TendencyFeatures(TertiaryData):
         # data = data.join(f)
         data = idxs.join(data)
         data = data.join(time, how="outer")
-        data = data.join
+        
 
 
         file_path = os.path.join(DATA_PATH, "tendency")
