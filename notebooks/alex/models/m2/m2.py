@@ -152,6 +152,8 @@ def buildModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
 
     model.summary()
 
+    print('\n')
+
     return model
 
 
@@ -194,11 +196,11 @@ def plotHistory ( history ):
 # main for function call.
 if __name__ == "__main__":
 
-    prepData('EUR_USD', load_SYMBOLS=True)
+    prepData(load_SYMBOLS=True)
 
     for sym in SYMBOLS:
 
-        print('\n',sym,'\n')
+        print('\n', sym)
 
         params = os.path.exists(__file__[:-3]+'_'+sym+'.h5')
         # train model or load model
@@ -208,7 +210,9 @@ if __name__ == "__main__":
             print('\n> Loading and preprocessing data... be patient..')
             # loading and preparing data
             y_train, X_train = prepData(sym, TRAIN_YEAR, VALID_YEAR)
-            y_test, X_test = prepData(sym, VALID_YEAR, TEST_YEAR)
+            y_test, X_test = prepData(sym, VALID_YEAR, VALID_YEAR)
+
+            print(y_train.shape, X_train.shape)
 
             model = buildModel(X_train , y_train)
 
