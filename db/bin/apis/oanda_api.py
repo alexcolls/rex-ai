@@ -173,7 +173,41 @@ class OandaApi:
             print("OANDA API ERROR", Exception)
 
 
+    
+    # return a list of the current pending orders for a given account
+    def getPendingOrders( self, account_id ):
+        
+        if account_id is None:
+            account_id = self.accounts[0]
+
+        req = 0
+        try:
+            req = self.client.get(
+                f"{self.enviroment}/{self.api_version}/accounts/{account_id}/pendingOrders"
+            )
+            return json.loads(req.content.decode("utf-8"))['orders']
+        except:
+            print("OANDA API ERROR", Exception)
+
+
+    # return a list of all historical orders of the account
+    def getAllOrders( self, account_id ):
+        
+        if account_id is None:
+            account_id = self.accounts[0]
+
+        req = 0
+        try:
+            req = self.client.get(
+                f"{self.enviroment}/{self.api_version}/accounts/{account_id}/openTrades"
+            )
+            return json.loads(req.content.decode("utf-8"))['trades']
+        except:
+            print("OANDA API ERROR", Exception)
+
+
     # return json with history candles between 2 dates (max periods=5000)
+    # for a given instruments
     def getCandles( self, symbol, timeframe, start_date, count=5000, include_frist=False, mids=True ):
 
         prices = "M" if mids else "BA"  # Mids or BidAsks
@@ -192,6 +226,8 @@ class OandaApi:
 
     def postOrder ( self ):
         return
+
+    
 
 
 # END
