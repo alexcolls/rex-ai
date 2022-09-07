@@ -1,21 +1,19 @@
 import os
 import time
 import pandas as pd
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from google.cloud import bigquery
+from utils import get_table_last_date
 
 PROJECT = "artful-talon-355716"
 DATASET = "rex_ai"
 LOCATION = "EU"
 
 dataset_id = f"{PROJECT}.{DATASET}"
-
 client = bigquery.Client()
-dataset = bigquery.Dataset(dataset_id)
-dataset.location = LOCATION
 
 
-def upload_data():
+def upload_tendency_volatility_data():
     DATA_PATH = os.path.normpath(
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "../", "data", "merge")
     )
@@ -30,23 +28,7 @@ def upload_data():
     for d in DIRS:
         path = os.path.join(DATA_PATH, d)
 
-        # Check last data available on GBQ
-        query = f"""
-            SELECT DATE_TIME
-            FROM `{dataset_id}.{d}`
-            ORDER BY DATE_TIME DESC
-            LIMIT 1
-        """
-
-        last_gbq_date = None
-
-        try:
-            query_job = client.query(query)
-            for row in query_job:
-                last_gbq_date = row[0]
-                break
-        except Exception:
-            print(f"No data found in {dataset_id}.{d}")
+        last_gbq_date = get_table_last_date(client, dataset_id, d)
 
         for file in os.listdir(path):
 
@@ -58,13 +40,15 @@ def upload_data():
             FIRST_VALID_HOUR = last_gbq_date or datetime(
                 2010, 1, 1, 0, 0, 0, 0, timezone.utc
             )
+            # FIRST_VALID_HOUR = FIRST_VALID_HOUR + timedelta(0, 3600)
             LAST_VALID_HOUR = datetime.now(timezone.utc)
             date_diff = LAST_VALID_HOUR - FIRST_VALID_HOUR
             hour_diff = date_diff.seconds // 3600
 
-            if hour_diff > 0:
+            data = data.loc[FIRST_VALID_HOUR + timedelta(0, 3600) : LAST_VALID_HOUR]
+
+            if hour_diff > 0 and len(data) > 0:
                 print(f"Uploading last {hour_diff} hours from {file} to {dataset_id}")
-                data = data.loc[FIRST_VALID_HOUR:LAST_VALID_HOUR]
 
                 try:
                     job_config = bigquery.LoadJobConfig(
@@ -87,4 +71,4 @@ def upload_data():
 
 
 if __name__ == "__main__":
-    upload_data()
+    upload_tendency_volatility_data()
