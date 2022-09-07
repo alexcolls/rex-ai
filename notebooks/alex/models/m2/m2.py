@@ -30,7 +30,9 @@ DB_PATH = '../../../../db/data/'
 SYMBOLS = []
 
 def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=LOOKBACK, load_SYMBOLS=False ):
-    ### TARGETS ###
+   
+   ### TARGETS ###
+
     # load history log returns
     y = pd.read_csv(DB_PATH+'merge/secondary/logs_.csv', index_col=0)
     if load_SYMBOLS:
@@ -40,6 +42,7 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
     y.index = pd.to_datetime(y.index)
     y = y.replace([np.inf, -np.inf, np.nan], 0)
     y = y[symbol].loc[str(start_year)+'-01-01':str(final_year)+'-12-31']
+
     # transform target to a classification (1, 0, -1)
     def condition(x, threshold):
         if x > threshold:
@@ -51,23 +54,28 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
     y = y.map(lambda x: condition(x, threshold)).to_numpy()
     encoder = OneHotEncoder(sparse = False)
     y = encoder.fit_transform(y.reshape(-1,1))
+
     ### FEATURES ###
+
     # load features
     X = pd.read_csv(DB_PATH+'merge/tendency/tendency.csv', index_col=0)
     X.index = pd.to_datetime(X.index)
     X = X.loc[str(start_year)+'-01-01':str(final_year)+'-12-31']
+
     # substract infinites and fill nans
     X.replace([np.inf, -np.inf], np.nan, inplace=True)
     X.fillna(method='bfill', inplace=True)
     X.fillna(method='ffill', inplace=True)
-    # update model's neurons by number of features on the dataset
+    # update model's neurons by number of featur
+    # es on the dataset
     global NEURONS
     NEURONS = len(X.columns)
+
     # scaling features
     scaler = StandardScaler()
     X = scaler.fit_transform(X)
 
-    # Export Pipeline as pickle file
+    # export pipeline as pickle file
     with open("scaler.pkl", "wb") as file:
         pickle.dump(scaler, file)
 

@@ -12,6 +12,7 @@ from sklearn.preprocessing import OneHotEncoder
 from keras.callbacks import EarlyStopping
 from keras import models
 import matplotlib.pyplot as plt
+import pickle
 
 
 EPOCHS = 100
@@ -67,23 +68,12 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
     X.fillna(method='ffill', inplace=True)
 
     # scaling features
-    def scaleData ( x ):
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X)
 
-        x_ = pd.Series(x.copy())
-        x_ = x_.values
-        x_ = x_.reshape((len(x_), 1))
-        # standard scaler
-        scaler = StandardScaler()
-        scaler = scaler.fit(x_)
-        #print('Min: %f, Max: %f' % (scaler.data_min_, scaler.data_max_))
-        normalized = scaler.transform(x_)
-        #print(normalized)
-        inversed = scaler.inverse_transform(x_)
-        #print(inversed)
-        return normalized, inversed
-
-    for col in X.columns:
-        X[col], _ = scaleData(X[col])
+    # export pipeline as pickle file
+    with open("scaler.pkl", "wb") as file:
+        pickle.dump(scaler, file)
 
     # make sequences TODO
     def makeSequences ( data, periods=lookback ):
