@@ -15,7 +15,10 @@ def updateDB():
     secondaryData = SecondaryData()
     tertiaryData = TertiaryData()
 
-    primaryData.deleteFolder("primary", "2022")
+    dirs = ["primary", "secondary", "tertiary"]
+    for d in dirs:
+        primaryData.deleteFolder(d, "2022")
+    primaryData.deleteFolder("merge")
 
     print("\n### PRIMARY DB ###")
     primaryData.checkDB()
@@ -46,6 +49,7 @@ def updateDB():
     VolatilityFeatures().getVolatility()
 
     print("\nYour DB is up to date. Bye!\n")
+
 
 # updateDB()
 
