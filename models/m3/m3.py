@@ -31,7 +31,7 @@ SYMBOLS = []
 
 
 # prepare X and y tensors
-def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=LOOKBACK, load_SYMBOLS=False ):
+def prepData( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=LOOKBACK, load_SYMBOLS=False ):
    
    ### TARGETS ###
 
@@ -113,7 +113,7 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
 
 
 # construct a sequential network
-def buildModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
+def buildModel( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
 
     print('\n> Building the LSTM model')
 
@@ -149,7 +149,7 @@ def buildModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
 
 
 # train & validate the network
-def trainModel ( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
+def trainModel( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
 
     early_stopping = EarlyStopping(monitor='accuracy', patience=10, mode='min', restore_best_weights=True)
 
@@ -163,7 +163,7 @@ def trainModel ( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
 
 
 # plot learning scores
-def plotHistory ( history ):
+def plotHistory( history ):
 
     # summarize history for accuracy
     plt.plot(history.history['accuracy'])
@@ -187,7 +187,7 @@ def plotHistory ( history ):
 
 
 # write testing scores
-def makeScores ( symbol, accuracy, loss, dataset='train' ):
+def makeScores( symbol, accuracy, loss, dataset='train' ):
 
     file = dataset+'_scores.csv'
 
