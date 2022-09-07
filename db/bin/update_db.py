@@ -1,13 +1,19 @@
 # author: Quantium Rock
 # license: MIT
 
+import pandas as pd
 from data_primary import PrimaryData
 from data_secondary import SecondaryData
 from data_tertiary import TertiaryData
 from merge import merge_db_data
 from volatility import VolatilityFeatures
 from tendency import TendencyFeatures
-from upload_gbq import upload_tendency_volatility_data, upload_csv_data
+from upload_gbq import (
+    upload_tendency_volatility_data,
+    upload_csv_data,
+    upload_dataframe,
+)
+from gbq_utils import load_last_rows
 
 
 def updateDB():
@@ -52,13 +58,11 @@ def updateDB():
 
     print("\n### BIG QUERY UPLOAD ###")
     upload_csv_data("primary", ["closes"])
-    upload_csv_data("tertiary", ["logs_"])
+    upload_csv_data("tertiary", ["logs_", "vols_"])
     upload_tendency_volatility_data()
 
     print("\nYour DB is up to date. Bye!\n")
 
-
-# updateDB()
 
 if __name__ == "__main__":
     updateDB()

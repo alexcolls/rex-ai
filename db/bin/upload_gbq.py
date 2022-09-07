@@ -3,7 +3,8 @@ import time
 import pandas as pd
 from datetime import datetime, timedelta, timezone
 from google.cloud import bigquery
-from gbq_utils import get_table_last_date
+from gbq_utils import get_table_last_date, load_last_rows
+
 
 PROJECT = "artful-talon-355716"
 DATASET = "rex_ai"
@@ -147,7 +148,9 @@ def upload_dataframe(df: pd.DataFrame, name: str):
 
     df.index = pd.to_datetime(df.index)
     df.index.name = "DATE_TIME"
-    FIRST_VALID_HOUR = last_gbq_date or datetime(2010, 1, 1, 0, 0, 0, 0, timezone.utc)
+    FIRST_VALID_HOUR = last_gbq_date or max(
+        datetime(2010, 1, 1, 0, 0, 0, 0, timezone.utc), df.index[0]
+    )
     df = df.loc[FIRST_VALID_HOUR + timedelta(0, 3600) :]
 
     if len(df) > 0:
@@ -171,7 +174,12 @@ def upload_dataframe(df: pd.DataFrame, name: str):
     return
 
 
+def create_fake_predictions():
+    pass
+
+
 if __name__ == "__main__":
-    upload_csv_data("primary", ["closes"])
-    upload_csv_data("tertiary", ["logs_"])
-    upload_tendency_volatility_data()
+    pass
+    # upload_csv_data("primary", ["closes"])
+    # upload_csv_data("tertiary", ["logs_"])
+    # upload_tendency_volatility_data()
