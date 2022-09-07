@@ -87,7 +87,7 @@ def prepData( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRE
     X = scaler.fit_transform(X)
 
     # export pipeline as pickle file
-    with open(__file__[:-3]+'_pipeline.pkl', 'wb') as file:
+    with open('s3_'+symbol+'.pkl', 'wb') as file:
         pickle.dump(scaler, file)
 
     # make sequences and output tensors

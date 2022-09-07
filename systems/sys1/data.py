@@ -26,7 +26,6 @@ class DataSet:
         # create directories if doesn't exist
         Path(self.db_path).mkdir(parents=True, exist_ok=True)
 
-
     # get data by year
     def getCandles( self ):
 
@@ -109,7 +108,6 @@ class DataSet:
 
         return op, hi, lo, cl, vo
 
-
     # get data by year
     def normalizeData( self, op, hi, lo, cl ):
 
@@ -121,7 +119,6 @@ class DataSet:
         lows = (cl / lo - 1) * 100
 
         return logs, rets, vols, higs, lows
-
 
     # get data by year
     def reduceDimension( self, logs, rets, vols, higs, lows ):
@@ -172,8 +169,7 @@ class DataSet:
 
         return logs, rets, vols, higs, lows, idxs
 
-
-    # get currencies (str)
+    # get currencies [str]
     def getCcys( self ):
         ccys = []
         for sym in self.symbols:
@@ -185,11 +181,10 @@ class DataSet:
         ccys.sort()
         return ccys
 
-
     ### INDICATORS ###
 
     def time_standard( self, df ):
-        # Spliting Datetime
+        # spliting datetime
         data = pd.DataFrame([])
         data.index = pd.to_datetime(df.index) # type: ignore
 
@@ -205,7 +200,8 @@ class DataSet:
 
         return data
 
-    def correlations(df, rate=120):
+    def correlations( self, df, window=120 ):
+
         data = pd.DataFrame([])
         for sym in SYMBOLS:
             data[f'{sym[:3]}_{sym[4:]}_corr'] = df[f'{sym[:3]}'].rolling(rate).corr(df[f'{sym[4:]}'])
@@ -226,17 +222,22 @@ class DataSet:
         bol.set_index(df.index, inplace=True)
         return bol
 
-    def bollinger_small( self, df, rate=24, sigma_start=2, sigma_stop=2):
+    def bollinger_small( self, df, rate=24, n_devs=[ 1, 2, 3 ]):
 
         data = pd.DataFrame([])
         for currency in df.columns:
-            data[f'{currency}_sma'] = df[currency].rolling(rate).mean()
-            data[f'{currency}_std']= df[currency].rolling(rate).std()
+            sma = df[currency].rolling(rate).mean()
+            std  = df[currency].rolling(rate).std()
+            data[f'{currency}_sma'] = sma
+            data[f'{currency}_std'] = std
+            for i in n_devs:
+                data[f'{currency}_+{i}std'] = sma + std * i
+                data[f'{currency}_-{i}std'] = sma - std * i
         data.index = df.index
 
         return data
 
-    def volatility( self, df, rate=240, window=506):
+    def volatility( self, df, rate=240, window=506 ):
 
         data = pd.DataFrame([])
         for currency in df.columns:
@@ -246,7 +247,7 @@ class DataSet:
 
         return data
 
-    def sharpe_ratio(self, df, window=24):
+    def sharpe_ratio( self, df, window=24 ):
 
         data = pd.DataFrame([])
         for currency in df.columns:
@@ -272,7 +273,7 @@ class DataSet:
         
         return data
 
-    def ema( self, df, window=48):
+    def ema( self, df, window=48 ):
         """
         Exponential movint average
         """
@@ -282,7 +283,6 @@ class DataSet:
         data.index = df.index
 
         return data
-
 
     def highpass_filter( self, df, order=5, cutoff=0.2):
 
@@ -304,7 +304,7 @@ class DataSet:
 
         return data
 
-    def rsi( self, df, periods = 240 ):
+    def rsi( self, df, window=240 ):
         
         data = pd.DataFrame([])
         for currency in df.columns:
@@ -341,7 +341,7 @@ class DataSet:
         data.fillna(0, inplace=True)
         return data
 
-    def ema_diff( df, window=8 ):
+    def ema_diff( self, df, window=8 ):
 
         data = pd.DataFrame([])
         for currency in df.columns:
@@ -360,5 +360,6 @@ if __name__ == "__main__":
     op, hi, lo, cl, vo = data.getCandles()
     logs, rets, vols, higs, lows = data.normalizeData(op, hi, lo, cl, vo)
     logs_, rets_, vols_, higs_, lows_, idxs_ = data.reduceDimension(logs, rets, vols, higs, lows)
+
 
 
