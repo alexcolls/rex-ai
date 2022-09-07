@@ -223,16 +223,15 @@ class OandaApi:
     ### POST methods ###
 
     # open new order on a specific instrument & account
-    def postOrder ( self, account_id, instrument, units ):
+    def postOrder ( self, account_id, instrument, units, order_type='MARKET', time_in_force='FOK' ):
 
         data = { "order": {
-                "type": "MARKET",
+                "type": order_type,
                 "positionFill": "DEFAULT",
                 "instrument": instrument,
-                "timeInForce": "FOK",
+                "timeInForce": time_in_force,
                 "units": str(units)
-                }
-        }
+                } }
 
         data = json.dumps(data, indent=4) 
 
@@ -244,3 +243,4 @@ class OandaApi:
 
 
 #__OandaApi()
+
