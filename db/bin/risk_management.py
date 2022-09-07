@@ -13,14 +13,14 @@ class RiskManagement():
 
     def getPrediction(self):
         tend_prediction_df = load_last_rows("tend_prediction",1)
-        # vol_prediction_df = load_last_rows("vol_prediction",120)
-        return tend_prediction_df
+        vol_prediction_df = load_last_rows("vol_prediction",120)
+        return tend_prediction_df, vol_prediction_df
 
 
 
     def getLast(self):
         primary_df = load_last_rows("closes",1)
-        tertiary_logs_df = load_last_rows("logs_",120)
+        tertiary_logs_df = load_last_rows("logs_",240)
         return primary_df, tertiary_logs_df
 
     def mean_volatility_prediction(self, logs, rate=120):
@@ -28,8 +28,9 @@ class RiskManagement():
         for ccy in logs.columns:
             data[ccy] = logs[ccy].rolling(rate).mean()
         data.index = logs.index
+        data2 = data.iloc[-1:].copy()
 
-        return data
+        return data, data2
 
     def correlation_pairs(self, pred_vols):
 

@@ -1,54 +1,33 @@
 from risk_management import RiskManagement
-from gbq_utils import upload_dataframe
+from upload_gbq import upload_dataframe
 
 
 
 
 
-def updateDB():
+def upload_trade_signals():
 
-    primaryData = PrimaryData()
-    secondaryData = SecondaryData()
-    tertiaryData = TertiaryData()
+    rm = RiskManagement()
 
-    dirs = ["primary", "secondary", "tertiary"]
-    for d in dirs:
-        primaryData.deleteFolder(d, "2022")
-    primaryData.deleteFolder("merge")
 
-    print("\n### PRIMARY DB ###")
-    primaryData.checkDB()
+    pred_tend, pred_vol = rm.getPrediction()
+    closes_df, logs_df = rm.getLast()
 
-    if primaryData.missing_years:
-        # user confirmation
-        # input("\nUpdate database?\n> Press Enter to proceed\n\n>>> ")
-        primaryData.updateDB()
 
-    print("\n### SECONDARY DB ###")
-    secondaryData.checkDB()
-    secondaryData.updateDB()
+    last_data, pred_vol = rm.mean_volatility_prediction(logs_df)
 
-    print("\n### TERTIARY DB ###")
-    tertiaryData.checkDB()
-    tertiaryData.updateDB()
+    exchange_rate = rm.read_exchange_rate(closes_df)
 
-    print("\nPrimary, Secondary & Tertiary DB up to date!")
-    # input("\nDo you wanna merge db's?\n> Press Enter to proceed\n\n>>> ")
+    trade_signals, trade_signals_df = rm.trade_signals(pred_vol,last_data, pred_tend, exchange_rate)
 
-    print("\n### MERGE DB DATA ###")
-    merge_db_data()
 
-    print("\nDB's merged successfully.")
-    # input("\nDo you update indicators?\n> Press Enter to proceed\n\n>>> ")
-
-    print("\n### FEATURE ENGINEERING ###")
-    TendencyFeatures().getTendency()
-    VolatilityFeatures().getVolatility()
 
     print("\n### BIG QUERY UPLOAD ###")
-    upload_primary_data(["closes"])
-    upload_tendency_volatility_data()
+    upload_dataframe(exchange_rate, "exchange_rate")
+    upload_dataframe(trade_signals_df, "trade_signals")
+
+
 
     print("\nYour DB is up to date. Bye!\n")
 if __name__ == "__main__":
-    updateDB()
+    upload_trade_signals()
