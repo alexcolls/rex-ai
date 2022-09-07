@@ -53,6 +53,50 @@ class OandaApi:
         
         self.api_version = 'v3'
 
+        self.accounts = self.getAccounts()
+
+
+    
+    # return a list of all the api accounts ids
+    def getAccounts( self ):
+
+        req = 0
+        try:
+            req = self.client.get(
+                f"{self.enviroment}/{self.api_version}/accounts"
+            )
+            req = json.loads(req.content.decode("utf-8"))['accounts']
+        except:
+            print("OANDA API ERROR", Exception)
+            return
+
+        accs = []
+        for x in req:
+            accs.append(x['id'])
+        
+        return accs
+
+
+     
+    # return a list of all the api accounts ids
+    def getAccounts( self ):
+        
+        req = 0
+        try:
+            req = self.client.get(
+                f"{self.enviroment}/{self.api_version}/accounts"
+            )
+            req = json.loads(req.content.decode("utf-8"))['accounts']
+        except:
+            print("OANDA API ERROR", Exception)
+            return
+
+        accs = []
+        for x in req:
+            accs.append(x['id'])
+        
+        return accs
+
 
     # return json with history candles between 2 dates
     def getCandles( self, symbol, timeframe, start_date, count=5000, include_frist=False, mids=True ):
@@ -69,24 +113,9 @@ class OandaApi:
             print("OANDA API ERROR", Exception)
     
 
-    # return a dataframe with the last n closes
-    def getCloses( self, symbol, timeframe, count=5000 ):
-
-        req = 0
-        try:
-            req = self.client.get(
-                f"{self.enviroment}/{self.api_version}/instruments/{symbol}/candles?count={count}&price=M&granularity={timeframe}"
-            )
-            req = json.loads(req.content.decode("utf-8"))["candles"]
-        except:
-            print("OANDA API ERROR", Exception)
-
-        data = { 'dt': [], 'close': [] }
-        for x in req:
-            data['dt'].append(x['time'])
-            data['']
 
 
+    # return 
 
     # ORDER EXECUTOR
 
