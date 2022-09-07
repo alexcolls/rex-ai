@@ -13,7 +13,6 @@ from config import SYMBOLS, TIMEFRAME, START_YEAR
 ### PrimaryData -> download candles from oanda_api to ../data/primary/<year>/:
 # opens.csv, highs.csv, lows.csv, closes.csv, volumes.csv
 
-
 class PrimaryData:
 
     ## class constructor
@@ -29,6 +28,7 @@ class PrimaryData:
             )
         )
         self.db_path = self.primary_path
+        Path(self.db_path).mkdir(parents=True, exist_ok=True)
 
     ## update data of primary db missing years & weeks
     def updateDB(self):

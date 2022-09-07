@@ -18,7 +18,7 @@ import csv
 
 # LSTM model parameters
 LAYERS = 7
-NEURONS = 100
+NEURONS = 100 # updated automatically after knowing X features
 LOOKBACK = 120
 EPOCHS = 100
 THRESHOLD = 0.05 # volatility % bellow = 0
@@ -29,6 +29,8 @@ FINAL_YEAR = 2022
 DB_PATH = '../../../../db/data/'
 SYMBOLS = []
 
+
+# prepare X and y tensors
 def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=LOOKBACK, load_SYMBOLS=False ):
    
    ### TARGETS ###
@@ -42,6 +44,7 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
         SYMBOLS = y.columns
         return 0
     
+    # cut df and get target
     y.index = pd.to_datetime(y.index)
     y = y.replace([np.inf, -np.inf, np.nan], 0)
     y = y[symbol].loc[str(start_year)+'-01-01':str(final_year)+'-12-31']
@@ -54,7 +57,11 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
             return -1
         else:
             return 0
+    
+    # transform log returns to classification values
     y = y.map(lambda x: condition(x, threshold)).to_numpy()
+
+    # encode and reshape data
     encoder = OneHotEncoder(sparse = False)
     y = encoder.fit_transform(y.reshape(-1,1))
 
@@ -70,8 +77,8 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
     X.replace([np.inf, -np.inf], np.nan, inplace=True)
     X.fillna(method='bfill', inplace=True)
     X.fillna(method='ffill', inplace=True)
-    # update model's neurons by number of featur
-    # es on the dataset
+
+    # update model's neurons by number of features
     global NEURONS
     NEURONS = len(X.columns)
 
@@ -85,22 +92,24 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
 
     # make sequences and output tensors
     def makeSequences( X, y, lookback=lookback ):
+
         X = pd.DataFrame(X)
         y = pd.DataFrame(y)
-        n_days = lookback
         X_tensor = []
         y_tensor = []
-        for index in range(n_days, X.shape[0]):
+        for index in range(lookback, X.shape[0]):
             try:
-                X_tensor.append(X.iloc[index - n_days:index])
+                X_tensor.append(X.iloc[index - lookback:index])
                 y_tensor.append(y.iloc[index+1])
             except:
                 break
+        
         X_tensor = np.array(X_tensor[:-1])
         y_tensor = np.array(y_tensor)
+
         return X_tensor, y_tensor
 
-    return makeSequences( X, y, lookback=lookback )
+    return makeSequences( X, y )
 
 
 # construct a sequential network
@@ -142,7 +151,7 @@ def buildModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
 # train & validate the network
 def trainModel ( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
 
-    early_stopping = EarlyStopping(monitor='accuracy', patience=24, mode='min', restore_best_weights=True)
+    early_stopping = EarlyStopping(monitor='accuracy', patience=10, mode='min', restore_best_weights=True)
 
     history = model.fit(X , y, epochs=epochs, batch_size=LOOKBACK, verbose=1, callbacks=[early_stopping], validation_data=(X_val, y_val))
 
@@ -180,13 +189,13 @@ def plotHistory ( history ):
 # write testing scores
 def makeScores ( symbol, accuracy, loss, dataset='train' ):
 
-    folder = './'+dataset+'_'+symbol+'.csv'
-    Path(folder).mkdir(parents=True, exist_ok=True)
+    file = dataset+'_scores.csv'
 
     field_names = ['symbol', 'accuracy', 'loss']
     inp = {'symbol': symbol, 'accuracy': accuracy, 'loss': loss}
 
-    with open('demo_csv.csv', 'a') as csv_file:
+    # append row to scores csv
+    with open(file, 'a') as csv_file:
         dict_object = csv.DictWriter(csv_file, fieldnames=field_names) 
         dict_object.writerow(inp)
         
@@ -215,17 +224,18 @@ if __name__ == "__main__":
 
             print(y_train.shape, X_train.shape)
 
-            model = buildModel(X_train , y_train)
+            # build
+            model = buildModel(X_train , y_train, LAYERS, NEURONS, 0.1)
 
-            # fit model
+            # fit
             history = trainModel(model, X_train, y_train, X_valid, y_valid, sym)
 
             print('\n')
-            # test model
+            # validate
             results = model.evaluate(X_valid, y_valid)
 
             # write validation scores to csv
-            makeScores( sym, results[1], results[0], datasets='val' )
+            makeScores( sym, results[1], results[0], dataset='val' )
 
             print('\n')
             print('validation loss:', round(results[0],2), 'validation accuracy:', round(results[1],2))
@@ -233,17 +243,20 @@ if __name__ == "__main__":
 
         else:
 
+            # load validation & testing data
             X_val, y_val = prepData(sym, VALID_YEAR, TEST_YEAR-1)
             X_test, y_test = prepData(sym, TEST_YEAR, FINAL_YEAR)
 
+            # load model's params
             model = load_model(__file__[:-3]+'_'+sym+'.h5')
 
+            # test
             results = model.evaluate(X_val, y_val)
 
             print(results)
 
             # write test scores to csv
-            makeScores( sym, results[1], results[0], datasets='test' )
+            makeScores( sym, round(results[1],2), round(results[0],2), dataset='test' )
 
             print('\n')
             print('test loss:', round(results[0],2), 'test accuracy:', round(results[1],2))

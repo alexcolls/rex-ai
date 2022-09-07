@@ -14,6 +14,7 @@ class SecondaryData(PrimaryData):
         super().__init__()
         self.secondary_path = self.primary_path.replace("primary", "secondary")
         self.db_path = self.secondary_path
+        Path(self.db_path).mkdir(parents=True, exist_ok=True)
 
     def getData(self, year=2022):
 

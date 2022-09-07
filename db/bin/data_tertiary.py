@@ -8,11 +8,13 @@ from data_secondary import SecondaryData
 
 
 class TertiaryData(SecondaryData):
+
     def __init__(self):
 
         super().__init__()
         self.tertiary_path = self.secondary_path.replace("secondary", "tertiary")
         self.db_path = self.tertiary_path
+        Path(self.db_path).mkdir(parents=True, exist_ok=True)
         self.ccys = self.getCcys()
 
     def getCcys(self):
