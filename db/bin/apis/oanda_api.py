@@ -64,9 +64,8 @@ class OandaApi:
                 f"{self.enviroment}/{self.api_version}/accounts"
             )
             req = json.loads(req.content.decode("utf-8"))['accounts']
-        except:
-            print("OANDA API ERROR", Exception)
-            return
+        except Exception as e:
+            print(e)
 
         accs = []
         for x in req:
@@ -87,8 +86,8 @@ class OandaApi:
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/summary"
             )
             return json.loads(req.content.decode("utf-8"))['accounts']
-        except:
-            print("OANDA API ERROR", Exception)
+        except Exception as e:
+            print(e)
 
     
     # return a json with all tradeable instruments for a given accoount
@@ -103,8 +102,8 @@ class OandaApi:
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/instruments"
             )
             return json.loads(req.content.decode("utf-8"))['instruments']
-        except:
-            print("OANDA API ERROR", Exception)
+        except Exception as e:
+            print(e)
 
     
     # return a list of the current trading positions for a given account
@@ -119,8 +118,8 @@ class OandaApi:
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/openPositions"
             )
             return json.loads(req.content.decode("utf-8"))['positions']
-        except:
-            print("OANDA API ERROR", Exception)
+        except Exception as e:
+            print(e)
 
     
     # return a list with the PnLs of each instrument for a given account
@@ -135,8 +134,8 @@ class OandaApi:
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/positions"
             )
             return json.loads(req.content.decode("utf-8"))['positions']
-        except:
-            print("OANDA API ERROR", Exception)
+        except Exception as e:
+            print(e)
 
 
     # return a list of the current open trades for a given account
@@ -151,8 +150,8 @@ class OandaApi:
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/openTrades"
             )
             return json.loads(req.content.decode("utf-8"))['trades']
-        except:
-            print("OANDA API ERROR", Exception)
+        except Exception as e:
+            print(e)
 
 
     # return a list of all historical trades of the account
@@ -167,8 +166,8 @@ class OandaApi:
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/openTrades"
             )
             return json.loads(req.content.decode("utf-8"))['trades']
-        except:
-            print("OANDA API ERROR", Exception)
+        except Exception as e:
+            print(e)
 
     
     # return a list of the current pending orders for a given account
@@ -183,8 +182,8 @@ class OandaApi:
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/pendingOrders"
             )
             return json.loads(req.content.decode("utf-8"))['orders']
-        except:
-            print("OANDA API ERROR", Exception)
+        except Exception as e:
+            print(e)
             
 
     # return a list of all historical orders of the account
@@ -199,8 +198,8 @@ class OandaApi:
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/openTrades"
             )
             return json.loads(req.content.decode("utf-8"))['trades']
-        except:
-            print("OANDA API ERROR", Exception)
+        except Exception as e:
+            print(e)
 
 
     # return json with history candles between 2 dates (max periods=5000)
@@ -215,8 +214,23 @@ class OandaApi:
             )
 
             return json.loads(req.content.decode("utf-8"))["candles"]
-        except:
-            print("OANDA API ERROR", Exception)
+        except Exception as e:
+            print(e)
+    
+
+    # return last n candles by symbol & timeframe
+    def getLastCandles( self, symbol, timeframe, count=5000, mids=True ):
+
+        prices = "M" if mids else "BA"  # Mids or BidAsks
+
+        try:
+            req = self.client.get(
+                f"{self.enviroment}/{self.api_version}/instruments/{symbol}/candles?count={count}&price={prices}&granularity={timeframe}"
+            )
+
+            return json.loads(req.content.decode("utf-8"))["candles"]
+        except Exception as e:
+            print(e)
     
 
     ### POST methods ###
@@ -237,8 +251,8 @@ class OandaApi:
         try:
             req = self.client.post( f"{self.enviroment}/{self.api_version}/accounts/{account_id}/orders", data=str(data) )
             return json.loads(req.content.decode("utf-8"))
-        except:
-            print("ORDER POST FAILED!!!", Exception)
+        except Exception as e:
+            print(e)
 
 
 #__OandaApi()
