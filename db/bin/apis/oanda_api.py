@@ -122,7 +122,6 @@ class OandaApi:
         except:
             print("OANDA API ERROR", Exception)
 
-
     
     # return a list with the PnLs of each instrument for a given account
     def getAllPositions( self, account_id ):
@@ -232,7 +231,7 @@ class OandaApi:
                 "timeInForce": time_in_force,
                 "units": str(units)
                 } }
-
+                
         data = json.dumps(data, indent=4) 
 
         try:
@@ -243,4 +242,3 @@ class OandaApi:
 
 
 #__OandaApi()
-
