@@ -69,13 +69,13 @@ def upload_tendency_volatility_data():
     return
 
 
-def upload_primary_data(files: list, year: int = 2022):
+def upload_csv_data(parent: str, files: list, year: int = 2022):
     DATA_PATH = os.path.normpath(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             "../",
             "data",
-            "primary",
+            parent,
             str(year),
         )
     )
@@ -134,6 +134,44 @@ def upload_primary_data(files: list, year: int = 2022):
     return
 
 
+def upload_dataframe(df: pd.DataFrame, name: str):
+
+    try:
+        client.create_dataset(bigquery.Dataset(dataset_id), timeout=30)
+        print(f"Created empty dataset {dataset_id}")
+    except Exception:
+        print(f"Dataset {dataset_id} exists")
+
+    last_gbq_date = get_table_last_date(client, dataset_id, name)
+    start_time = time.time()
+
+    df.index = pd.to_datetime(df.index)
+    df.index.name = "DATE_TIME"
+    FIRST_VALID_HOUR = last_gbq_date or datetime(2010, 1, 1, 0, 0, 0, 0, timezone.utc)
+    df = df.loc[FIRST_VALID_HOUR + timedelta(0, 3600) :]
+
+    if len(df) > 0:
+        print(f"Uploading last {len(df)} hours from {name} to {dataset_id}")
+
+        try:
+            job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+            job = client.load_table_from_dataframe(
+                df,
+                f"{dataset_id}.{name}",
+                job_config=job_config,
+            )  # Make an API request.
+            job.result()
+        except Exception as e:
+            print(e)
+
+        print(f"Uploaded successfully in {round(time.time() - start_time, 2)}s")
+    else:
+        print(f"{dataset_id}.{name} up to date")
+
+    return
+
+
 if __name__ == "__main__":
-    upload_primary_data(["closes"])
+    upload_csv_data("primary", ["closes"])
+    upload_csv_data("tertiary", ["logs_"])
     upload_tendency_volatility_data()
