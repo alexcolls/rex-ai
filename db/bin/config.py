@@ -17,3 +17,7 @@ SYMBOLS = [ 'AUD_CAD', 'AUD_CHF', 'AUD_JPY', 'AUD_NZD', 'AUD_USD',
 # b) model granularity (S5, M1, M15, H1, H8, D)
 
 TIMEFRAME = 'H1'
+
+# c) db start year
+
+START_YEAR = 2010

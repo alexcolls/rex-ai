@@ -7,10 +7,7 @@ from datetime import datetime, timedelta, timezone
 import pandas as pd
 
 from apis.oanda_api import OandaApi
-from config import SYMBOLS
-from config import TIMEFRAME
-
-import time
+from config import SYMBOLS, TIMEFRAME, START_YEAR
 
 
 ### PrimaryData -> download candles from oanda_api to ../data/primary/<year>/:
@@ -20,7 +17,7 @@ import time
 class PrimaryData:
 
     ## class constructor
-    def __init__(self, symbols=SYMBOLS, timeframe=TIMEFRAME, start_year=2009):
+    def __init__(self, symbols=SYMBOLS, timeframe=TIMEFRAME, start_year=START_YEAR):
 
         # quotes granularity default=5_second_bars
         self.symbols = symbols

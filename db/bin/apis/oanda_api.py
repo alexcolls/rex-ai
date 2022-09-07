@@ -29,7 +29,7 @@ class OandaApi:
         },
     }
 
-    def __init__(self, PRIVATE_KEY=False, LIVE_TRADING=False):
+    def __init__( self, PRIVATE_KEY=False, LIVE_TRADING=False ):
 
         # upload Onada authenthification ./keys/oanda.json
         APIKEY_PATH = os.path.normpath(
@@ -50,21 +50,43 @@ class OandaApi:
         # set request session  and add authentification metadata
         self.client = requests.Session()
         self.client.headers["Authorization"] = "Bearer " + self.TOKEN
+        
+        self.api_version = 'v3'
 
-    # __ OandaApi.getCandles('EUR_USD', 'H1', '2022-01-01')
 
-    def getCandles( self, symbol, timeframe, start_date, count=5000, include_frist=False, api_version="v3", mids=True ):
+    # return json with history candles between 2 dates
+    def getCandles( self, symbol, timeframe, start_date, count=5000, include_frist=False, mids=True ):
 
         prices = "M" if mids else "BA"  # Mids or BidAsks
 
         try:
             req = self.client.get(
-                f"{self.enviroment}/{api_version}/instruments/{symbol}/candles?count={count}&price={prices}&granularity={timeframe}&from={start_date}&includeFirst={include_frist}"
+                f"{self.enviroment}/{self.api_version}/instruments/{symbol}/candles?count={count}&price={prices}&granularity={timeframe}&from={start_date}&includeFirst={include_frist}"
             )
 
             return json.loads(req.content.decode("utf-8"))["candles"]
         except:
             print("OANDA API ERROR", Exception)
+    
+
+    # return a dataframe with the last n closes
+    def getCloses( self, symbol, timeframe, count=5000 ):
+
+        req = 0
+        try:
+            req = self.client.get(
+                f"{self.enviroment}/{self.api_version}/instruments/{symbol}/candles?count={count}&price=M&granularity={timeframe}"
+            )
+            req = json.loads(req.content.decode("utf-8"))["candles"]
+        except:
+            print("OANDA API ERROR", Exception)
+
+        data = { 'dt': [], 'close': [] }
+        for x in req:
+            data['dt'].append(x['time'])
+            data['']
+
+
 
     # ORDER EXECUTOR
 
