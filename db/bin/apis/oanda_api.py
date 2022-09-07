@@ -10,9 +10,7 @@ import json
 import os
 
 
-# API CLIENT
-
-
+# api client
 class OandaApi:
 
     # url constants
@@ -50,12 +48,13 @@ class OandaApi:
         # set request session  and add authentification metadata
         self.client = requests.Session()
         self.client.headers["Authorization"] = "Bearer " + self.TOKEN
-        
+        self.client.headers['Content-Type'] = 'application/json'      
         self.api_version = 'v3'
-
         self.accounts = self.getAccounts()
 
-    
+
+    ### GET methods ###
+
     # return a list of all the api accounts ids
     def getAccounts( self ):
 
@@ -172,7 +171,6 @@ class OandaApi:
         except:
             print("OANDA API ERROR", Exception)
 
-
     
     # return a list of the current pending orders for a given account
     def getPendingOrders( self, account_id ):
@@ -188,7 +186,7 @@ class OandaApi:
             return json.loads(req.content.decode("utf-8"))['orders']
         except:
             print("OANDA API ERROR", Exception)
-
+            
 
     # return a list of all historical orders of the account
     def getAllOrders( self, account_id ):
@@ -222,12 +220,27 @@ class OandaApi:
             print("OANDA API ERROR", Exception)
     
 
-    # ORDER EXECUTOR
+    ### POST methods ###
 
-    def postOrder ( self ):
-        return
+    # open new order on a specific instrument & account
+    def postOrder ( self, account_id, instrument, units ):
 
-    
+        data = { "order": {
+                "type": "MARKET",
+                "positionFill": "DEFAULT",
+                "instrument": instrument,
+                "timeInForce": "FOK",
+                "units": str(units)
+                }
+        }
+
+        data = json.dumps(data, indent=4) 
+
+        try:
+            req = self.client.post( f"{self.enviroment}/{self.api_version}/accounts/{account_id}/orders", data=str(data) )
+            return json.loads(req.content.decode("utf-8"))
+        except:
+            print("ORDER POST FAILED!!!", Exception)
 
 
-# END
+#__OandaApi()
