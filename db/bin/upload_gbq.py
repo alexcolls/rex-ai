@@ -3,7 +3,7 @@ import time
 import pandas as pd
 from datetime import datetime, timedelta, timezone
 from google.cloud import bigquery
-from utils import get_table_last_date
+from gbq_utils import get_table_last_date
 
 PROJECT = "artful-talon-355716"
 DATASET = "rex_ai"
