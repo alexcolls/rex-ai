@@ -134,7 +134,7 @@ def buildModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
 
 def trainModel ( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
 
-    early_stopping = EarlyStopping(monitor='accuracy', patience=24, mode='min', restore_best_weights=True)
+    early_stopping = EarlyStopping(monitor='accuracy', patience=2, mode='min', restore_best_weights=True)
 
     history = model.fit(X , y, epochs=epochs, batch_size=LOOKBACK, verbose=1, callbacks=[early_stopping], validation_data=(X_val, y_val))
 
