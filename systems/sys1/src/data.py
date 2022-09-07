@@ -396,6 +396,6 @@ class TertiaryData(SecondaryData):
 
 
 
-# main for function call.
+# main for function call
 if __name__ == "__main__":
-
+    pass
