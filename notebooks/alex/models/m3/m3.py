@@ -202,7 +202,6 @@ def makeScores ( symbol, accuracy, loss, dataset='train' ):
     return True
 
     
-
 # main for function call.
 if __name__ == "__main__":
 
@@ -235,7 +234,7 @@ if __name__ == "__main__":
             results = model.evaluate(X_valid, y_valid)
 
             # write validation scores to csv
-            makeScores( sym, results[1], results[0], dataset='val' )
+            makeScores( sym, round(results[1],2), round(results[0],2), dataset='val' )
 
             print('\n')
             print('validation loss:', round(results[0],2), 'validation accuracy:', round(results[1],2))
