@@ -54,28 +54,30 @@ class PrimaryData:
 
         return True
 
-    def deleteFolder(self, parent: str, year: str) -> None:
+    def deleteFolder(self, parent: str, year: str = "") -> None:
         import shutil
 
-        PATH_2022 = os.path.normpath(
-            os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                "../",
-                "data",
-                parent,
-                year,
+        if year:
+            PATH_2022 = os.path.normpath(
+                os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    "../",
+                    "data",
+                    parent,
+                    year,
+                )
             )
-        )
-
-        PATH_MERGE = os.path.normpath(
-            os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), "../", "data", "merge"
+        else:
+            PATH_2022 = os.path.normpath(
+                os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)), "../", "data", parent
+                )
             )
-        )
 
         shutil.rmtree(PATH_2022, ignore_errors=True)
-        shutil.rmtree(PATH_MERGE, ignore_errors=True)
-        print("Deleted 2022 and merge directories to update from scratch")
+        print(
+            f"Deleted {f'{parent}/{year}' if year else parent} directory to update from scratch"
+        )
         return
 
     ## check missing years in db/data/
@@ -118,7 +120,7 @@ class PrimaryData:
         # current hour
         now = datetime.utcnow()
 
-        day_of_year = now.timetuple().tm_yday-1
+        day_of_year = now.timetuple().tm_yday - 1
         current_hour = now.hour
 
         first_date = datetime(year, 1, 2)
@@ -129,7 +131,7 @@ class PrimaryData:
         dtimes = []
 
         if not current_year:
-            # get all trading hours of full year in datetime list           
+            # get all trading hours of full year in datetime list
             for day_ in range(360):
                 today = first_date + timedelta(days=day_)
                 if today.weekday() < 5:
@@ -140,8 +142,8 @@ class PrimaryData:
             for day_ in range(day_of_year):
                 today = first_date + timedelta(days=day_)
                 if today.weekday() < 5:
-                    if day_ == day_of_year-1:
-                        for hour_ in range(current_hour+1):
+                    if day_ == day_of_year - 1:
+                        for hour_ in range(current_hour + 1):
                             dtimes.append(today + timedelta(hours=hour_))
                     else:
                         for hour_ in range(24):
