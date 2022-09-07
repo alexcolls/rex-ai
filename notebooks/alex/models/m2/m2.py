@@ -18,9 +18,9 @@ NEURONS = 144
 LOOKBACK = 120
 EPOCHS = 100
 THRESHOLD = 0.05
-TRAIN_YEAR = 2018
-VALID_YEAR = 2021
-TEST_YEAR = 2021
+TRAIN_YEAR = 2022
+VALID_YEAR = 2022
+TEST_YEAR = 2002
 FINAL_YEAR = 2022
 DB_PATH = '../../../../db/data/'
 SYMBOLS = []
@@ -95,7 +95,7 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
     # make sequences
     def makeSequences( x, lookback=lookback ):
 
-        x_ = x.to_numpy()
+        x_ = x.copy().to_numpy()
         out_ = []
         for i in range(len(x_)):
             seq = 0
@@ -105,7 +105,7 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
                 pass
             out_.append(seq)
         
-        return np.array(out_)
+        return out_
 
     for col in X.columns:
         X[col] = makeSequences(X[col])
@@ -161,7 +161,7 @@ def trainModel ( model, X, y, symbol, epochs=EPOCHS, plot=False):
 
     early_stopping = EarlyStopping(monitor='accuracy', patience=2, mode='min')
 
-    history = model.fit(X, y, epochs=epochs, batch_size=LOOKBACK, callbacks=[early_stopping], verbose=2)
+    history = model.fit(np.asarray(X , dtype = np.float32) , y, epochs=epochs, batch_size=LOOKBACK, callbacks=[early_stopping], verbose=2)
 
     model.save(__file__[:-3]+'_'+symbol+'.h5')
 
