@@ -12,8 +12,8 @@ class RiskManagement():
         pass
 
     def getPrediction(self):
-        tend_prediction_df = load_last_rows("tend_prediction",1)
-        vol_prediction_df = load_last_rows("vol_prediction",120)
+        tend_prediction_df = load_last_rows("tendency_pred",1)
+        vol_prediction_df = load_last_rows("volatility_pred",1)
         return tend_prediction_df, vol_prediction_df
 
 
@@ -26,7 +26,7 @@ class RiskManagement():
     def mean_volatility_prediction(self, logs, rate=120):
         data = pd.DataFrame([])
         for ccy in logs.columns:
-            data[ccy] = logs[ccy].rolling(rate).mean()
+            data[ccy] = logs[ccy].rolling(rate).mean() + logs[ccy].rolling(rate).std()*2
         data.index = logs.index
         data2 = data.iloc[-1:].copy()
 
