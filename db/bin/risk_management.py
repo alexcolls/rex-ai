@@ -2,7 +2,7 @@ import pandas as pd
 from gbq_utils import load_last_rows
 
 
-RISK = 0.01
+RISK = 1
 BALANCE = 100000
 LEVERAGE = 1
 
@@ -106,7 +106,7 @@ class RiskManagement():
         risked = risk*balance*leverage/(t*n)
 
 
-        trade_signals = []
+        trade_orders = []
         trade_dataframe = {"datetime":[],"currency":[], "side":[], "size":[]}
         for ccy in classification.columns:
             d = {}
@@ -114,20 +114,21 @@ class RiskManagement():
                 d["currency"] = ccy
                 trade_dataframe["currency"].append(ccy)
                 signal = "sell" if int(classification[ccy]) == -1 else "buy"
-                d["side"] = signal
                 trade_dataframe["side"].append(signal)
+
                 if ccy.split("_")[0] == "USD":
-                    d["size"] = round(risked)
+                    d["size"] = round(risked*int(classification[ccy]))
                     trade_dataframe["size"].append(round(risked))
                 else:
-                    d["size"] = round(risked*float(exchange_rate[ccy.split("_")[0]]))
+                    d["size"] = round(risked*float(exchange_rate[ccy.split("_")[0]])*int(classification[ccy]))
                     trade_dataframe["size"].append(round(risked*float(exchange_rate[ccy.split("_")[0]])))
                 d["datetime"] = v.index.to_list()[0].strftime("%Y-%m-%dT%H:%M:%S.Z")
                 trade_dataframe["datetime"].append(v.index.to_list()[0])
 
-                trade_signals.append(d)
+                trade_orders.append(d)
+
         trade_dataframe = pd.DataFrame.from_dict(trade_dataframe)
         trade_dataframe.set_index("datetime",inplace=True)
         trade_dataframe.index = pd.to_datetime(trade_dataframe.index)
 
-        return trade_signals, trade_dataframe
+        return trade_orders, trade_dataframe

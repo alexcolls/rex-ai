@@ -3,8 +3,6 @@ from upload_gbq import upload_dataframe
 
 
 
-
-
 def upload_trade_signals():
 
     rm = RiskManagement()
