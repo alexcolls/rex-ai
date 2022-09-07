@@ -15,7 +15,6 @@ import matplotlib.pyplot as plt
 import pickle
 
 
-
 # LSTM model parameters
 LAYERS = 3
 NEURONS = 144
