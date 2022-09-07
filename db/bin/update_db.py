@@ -7,7 +7,7 @@ from data_tertiary import TertiaryData
 from merge import merge_db_data
 from volatility import VolatilityFeatures
 from tendency import TendencyFeatures
-from upload_gbq import upload_tendency_volatility_data
+from upload_gbq import upload_tendency_volatility_data, upload_primary_data
 
 
 def updateDB():
@@ -51,6 +51,7 @@ def updateDB():
     VolatilityFeatures().getVolatility()
 
     print("\n### BIG QUERY UPLOAD ###")
+    upload_primary_data(["closes"])
     upload_tendency_volatility_data()
 
     print("\nYour DB is up to date. Bye!\n")
