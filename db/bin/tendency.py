@@ -18,6 +18,7 @@ from pathlib import Path
 
 
 class TendencyFeatures(TertiaryData):
+    
     def __init__(self):
         super().__init__()
 
