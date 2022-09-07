@@ -26,7 +26,7 @@ TRAIN_YEAR = 2018
 VALID_YEAR = 2021
 TEST_YEAR = 2022
 FINAL_YEAR = 2022
-DB_PATH = '../../../../db/data/'
+DB_PATH = '../../db/data/'
 SYMBOLS = []
 
 

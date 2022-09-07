@@ -1,42 +1,43 @@
 
+
 import os.path
 import numpy as np
 import pandas as pd
 from keras.layers import LSTM
 from keras.models import Sequential
 from keras.layers import Dense
-from keras import layers
-from pandas import Series
+from keras.layers import Dropout
+from keras.callbacks import EarlyStopping
+from keras.models import load_model
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
-from keras.callbacks import EarlyStopping
-from keras import models
 import matplotlib.pyplot as plt
 import pickle
 
 
+# LSTM model parameters
+LAYERS = 3
+NEURONS = 144
+LOOKBACK = 120
 EPOCHS = 100
-NEURONS = 200
 THRESHOLD = 0.05
 TRAIN_YEAR = 2018
 VALID_YEAR = 2021
 TEST_YEAR = 2022
 FINAL_YEAR = 2022
-DB_PATH = '../../../../db/data/'
+DB_PATH = '../../db/data/'
 SYMBOLS = []
 
+def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=LOOKBACK, load_SYMBOLS=False ):
+   
+   ### TARGETS ###
 
-def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=120, load_SYMBOLS=False ):
-
-    ### TARGET ###
-
+    # load history log returns
     y = pd.read_csv(DB_PATH+'merge/secondary/logs_.csv', index_col=0)
-
     if load_SYMBOLS:
         global SYMBOLS
         SYMBOLS = y.columns
-        return True
-
+        return 0
     y.index = pd.to_datetime(y.index)
     y = y.replace([np.inf, -np.inf, np.nan], 0)
     y = y[symbol].loc[str(start_year)+'-01-01':str(final_year)+'-12-31']
@@ -49,9 +50,7 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
             return -1
         else:
             return 0
-    
     y = y.map(lambda x: condition(x, threshold)).to_numpy()
-
     encoder = OneHotEncoder(sparse = False)
     y = encoder.fit_transform(y.reshape(-1,1))
 
@@ -61,11 +60,15 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
     X = pd.read_csv(DB_PATH+'merge/tendency/tendency.csv', index_col=0)
     X.index = pd.to_datetime(X.index)
     X = X.loc[str(start_year)+'-01-01':str(final_year)+'-12-31']
-    
+
     # substract infinites and fill nans
     X.replace([np.inf, -np.inf], np.nan, inplace=True)
     X.fillna(method='bfill', inplace=True)
     X.fillna(method='ffill', inplace=True)
+    # update model's neurons by number of featur
+    # es on the dataset
+    global NEURONS
+    NEURONS = len(X.columns)
 
     # scaling features
     scaler = StandardScaler()
@@ -75,40 +78,69 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
     with open("scaler.pkl", "wb") as file:
         pickle.dump(scaler, file)
 
-    # make sequences TODO
-    def makeSequences ( data, periods=lookback ):
-        pass
+    # make sequences
+    def makeSequences( X, y, lookback=lookback ):
+        X = pd.DataFrame(X)
+        y = pd.DataFrame(y)
+        n_days = lookback
+        X_tensor = []
+        y_tensor = []
+        for index in range(n_days, X.shape[0]):
+            try:
+                X_tensor.append(X.iloc[index - n_days:index])
+                y_tensor.append(y.iloc[index+1])
+            except:
+                break
+        X_tensor = np.array(X_tensor[:-1])
+        y_tensor = np.array(y_tensor)
+        return X_tensor, y_tensor
 
-    X = X.to_numpy()
-
-    # shift 1 X and y
-    y = y[:-1]
-    X = X[1:]
-
-    return y, X
+    return makeSequences( X, y, lookback=lookback )
 
 
-def buildModel ( X , y, neurons=NEURONS ):
+def buildModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
+
+    print('\n> Building the LSTM model')
+
+    neurons = int( neurons * ( 1 + dropout ) + 1 )
+
+    print('\nwith', neurons, 'neurons')
+    print('\nand', layers, 'layers')
+    print('\ndropout:', dropout)
 
     model = Sequential()
-    model.add(LSTM(neurons, activation='tanh', input_shape=(X.shape[1], 1)))
-    model.add(layers.Dropout(0.2))
-    model.add(layers.Dense(neurons , activation='tanh'))
-    model.add(layers.Dropout(0.2))
-    model.add(Dense(y.shape[-1], activation='softmax',))
+
+    model.add( LSTM(neurons, activation='tanh', return_sequences=False, input_shape=(X.shape[1], X.shape[2])) )
+
+    model.add( Dropout(dropout) )
+
+    for _ in range(layers):
+        model.add( Dense(neurons , activation='relu') )
+        model.add( Dropout(dropout) )
+
+    # final prediction
+    model.add( Dense(y.shape[-1], activation='softmax',) )
+
     model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+
+    print('\n')
+
     model.summary()
+
+    print('\n')
 
     return model
 
 
-def trainModel ( X , y, symbol, epochs=EPOCHS):
+def trainModel ( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
 
-    early_stopping = EarlyStopping(monitor='accuracy', patience=10, mode='min')
+    early_stopping = EarlyStopping(monitor='accuracy', patience=2, mode='min', restore_best_weights=True)
 
-    history = model.fit(X , y, epochs=epochs, callbacks=[early_stopping])
+    history = model.fit(X , y, epochs=epochs, batch_size=LOOKBACK, verbose=1, callbacks=[early_stopping], validation_data=(X_val, y_val))
 
     model.save(__file__[:-3]+'_'+symbol+'.h5')
+
+    if plot: plotHistory(history)
 
     return history 
 
@@ -139,31 +171,32 @@ def plotHistory ( history ):
 # main for function call.
 if __name__ == "__main__":
 
-    prepData('EUR_USD', load_SYMBOLS=True)
+    prepData(load_SYMBOLS=True)
 
     for sym in SYMBOLS:
 
-        print('\n',sym,'\n')
+        print('\n', sym)
 
         params = os.path.exists(__file__[:-3]+'_'+sym+'.h5')
-
         # train model or load model
         model = None
         if not params:
 
-            y_train, X_train = prepData(sym, TRAIN_YEAR, VALID_YEAR-1)
-            y_test, X_test = prepData(sym, VALID_YEAR, VALID_YEAR)
+            print('\n> Loading and preprocessing data...\n')
+            # loading and preparing data
+            X_train, y_train = prepData(sym, TRAIN_YEAR, VALID_YEAR-1)
+            X_valid, y_valid = prepData(sym, VALID_YEAR, VALID_YEAR)
+
+            print(y_train.shape, X_train.shape)
 
             model = buildModel(X_train , y_train)
 
             # fit model
-            history = trainModel(X_train, y_train, sym)
-
-            # plotHistory(history)
+            history = trainModel(model, X_train, y_train, X_valid, y_valid, sym)
 
             print('\n')
             # test model
-            results = model.evaluate(X_test, y_test) # batch_size=128)
+            results = model.evaluate(X_valid, y_valid)
 
             print('\n')
             print('test loss:', round(results[0],2), 'test accuracy:', round(results[1],2))
@@ -171,10 +204,10 @@ if __name__ == "__main__":
 
         else:
 
-            y_val, X_val = prepData(sym, VALID_YEAR, TEST_YEAR-1)
-            y_test, X_test = prepData(sym, TEST_YEAR, FINAL_YEAR)
+            X_val, y_val = prepData(sym, VALID_YEAR, TEST_YEAR-1)
+            X_test, y_test = prepData(sym, TEST_YEAR, FINAL_YEAR)
 
-            model = models.load_model(__file__[:-3]+'_'+sym+'.h5')
+            model = load_model(__file__[:-3]+'_'+sym+'.h5')
 
             results = model.evaluate(X_val, y_val)
 
