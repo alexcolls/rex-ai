@@ -12,7 +12,8 @@ from indicators import Indicators
 from config import SYMBOLS, TIMEFRAME, LOOKBACK
 
 
-class DataSet:
+class Predictions:
+
     def __init__(self, symbols=SYMBOLS, timeframe=TIMEFRAME, lookback=LOOKBACK):
 
         # quotes granularity
@@ -166,7 +167,7 @@ class DataSet:
         lows = lows[self.ccys]
 
         idxs = pd.DataFrame(index=rets.index, columns=self.ccys)
-        # create synthetic standarize idxs prices
+        # create synthetic standarize idxs prices (last_price+last_price*current_return)
         last_dt = 0
         for ccy in self.ccys:
             for i, dtime in enumerate(rets.index):
@@ -179,8 +180,9 @@ class DataSet:
 
         return logs, rets, vols, higs, lows, idxs
 
+
     # make indicators
-    def makeIndicators(self, df):
+    def makeIndicators( self, df ):
 
         indics = Indicators()
         time = indics.time_standard(df)
@@ -219,37 +221,82 @@ class DataSet:
 
         return data
 
-    def makePredictions(self):
+    
+    def randomPredictions( self ):
+
+        predictions = {}
+        for sym in self.symbols:
+            predictions[sym] = np.random.randint(-1, 2, 1)[0]
+
+        return pd.DataFrame.from_dict(predictions)
+
+
+    def makePredictions( self ):
 
         op, hi, lo, cl, vo = self.getCandles()
 
+        print(cl)
+
         logs, rets, vols, higs, lows = self.normalizeData(op, hi, lo, cl)
 
-        logs_, rets_, vols_, higs_, lows_, idxs_ = self.reduceDimension(
-            logs, rets, vols, higs, lows
-        )
+        print(logs)
+
+        logs_, rets_, vols_, higs_, lows_, idxs_ = self.reduceDimension(logs, rets, vols, higs, lows)
+
+        print(idxs_)
 
         indicators = self.makeIndicators(df=idxs_)
 
         predictions = {}
-        for sym in data.symbols:
+        for sym in self.symbols:
+            
+            X = indicators.filter(regex=f"{sym[:3]}|{sym[4:]}|sin|cos").copy()
+
+            X.replace([np.inf, -np.inf], np.nan, inplace=True)
+            X.fillna(method='bfill', inplace=True)
+            X.fillna(method='ffill', inplace=True)
+
             with open(f'model/s4_{sym}.pkl' , 'rb') as pickle_file:
                 scaler = pickle.load(pickle_file)
-            X = indicators.filter(regex=f"{sym[:3]}|{sym[4:]}|sin|cos")
             X = scaler.transform(X)
+
+            print(X)
+
+            # make sequences and output tensors
+            def makeSequences( X, lookback=LOOKBACK ):
+
+                X_tensor = []
+                for i in range(lookback, X.shape[0]):
+                    try:
+                        X_tensor.append(X.iloc[ i-lookback : i ])
+                    except:
+                        break
+
+                return np.array(X_tensor)
+
+            X_pred = makeSequences( X )
+
+            print(X_pred.shape)
+
+            X_pred = np.expand_dims(X_pred, axis=1)
+
+            print(X_pred.shape)
+
             model = load_model(f"model/m4_{sym}.h5")
-            predictions[sym] = model.predict(X)
+
+            predictions[sym] = model.predict(X_pred)
 
         print(predictions)
 
-        return predictions
+        return pd.DataFrame.from_dict(predictions)
+
 
 
 if __name__ == "__main__":
 
-    data = DataSet()
+    data = Predictions().randomPredictions()
 
-    data.makePredictions()
+    print(data)
 
 
 # TODO
