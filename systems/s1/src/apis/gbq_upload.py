@@ -1,16 +1,26 @@
 import os
 import time
+import json
 import pandas as pd
 from datetime import datetime, timedelta, timezone
 from google.cloud import bigquery
 from gbq_utils import get_table_last_date, load_last_rows
 
+config = json.load(
+    os.path.normpath(
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../", "../", "config.json"
+        )
+    )  # type: ignore
+)
+
+SYSTEM = config["SYSTEM"]
 
 PROJECT = "artful-talon-355716"
 DATASET = "rex_ai"
 LOCATION = "EU"
 
-dataset_id = f"{PROJECT}.{DATASET}"
+dataset_id = f"{PROJECT}.{DATASET}.{SYSTEM}"
 client = bigquery.Client()
 
 

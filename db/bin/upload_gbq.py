@@ -174,12 +174,8 @@ def upload_dataframe(df: pd.DataFrame, name: str):
     return
 
 
-def create_fake_predictions():
-    pass
-
-
 if __name__ == "__main__":
     pass
-    # upload_csv_data("primary", ["closes"])
-    # upload_csv_data("tertiary", ["logs_"])
-    # upload_tendency_volatility_data()
+    upload_csv_data("primary", ["closes"])
+    upload_csv_data("tertiary", ["logs_"])
+    upload_tendency_volatility_data()
