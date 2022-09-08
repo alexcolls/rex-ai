@@ -7,7 +7,6 @@ from config import RISK, BALANCE, LEVERAGE
 
 class RiskManagement:
 
-
     def __init__( self, risk=RISK, balance=BALANCE, leverage=LEVERAGE ):
 
         self.risk = risk
@@ -137,4 +136,3 @@ if __name__ == "__main__":
 
     rm = RiskManagement()
 
-    data.makePredictions()
