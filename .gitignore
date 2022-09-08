@@ -23,4 +23,5 @@ __pycache__
 __pycache__
 .python-version
 *.csv
+*.zip
 
