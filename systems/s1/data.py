@@ -198,7 +198,7 @@ class DataSet:
         ed24 = indics.ema_diff(df, window=24)
         ed120 = indics.ema_diff(df, window=120)
         sr = indics.sharpe_ratio(df, window=24)
-        bb = indics.bollinger_bands(df, rate=24)
+        bb = indics.bollinger_bands(df, window=24, n_devs=[1])
 
         data = lp.join(hp)
         data = data.join(lp_m)
@@ -233,10 +233,11 @@ class DataSet:
 
         predictions = {}
         for sym in data.symbols:
-            scaler = pickle.load(f"models/s3_{sym}.pkl")
+            with open(f'model/s4_{sym}.pkl' , 'rb') as pickle_file:
+                scaler = pickle.load(pickle_file)
             X = indicators.filter(regex=f"{sym[:3]}|{sym[4:]}|sin|cos")
             X = scaler.transform(X)
-            model = load_model(f"models/p3_{sym}.pkl")
+            model = load_model(f"model/m4_{sym}.h5")
             predictions[sym] = model.predict(X)
 
         print(predictions)

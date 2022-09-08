@@ -54,17 +54,19 @@ class Indicators:
         bol.set_index(df.index, inplace=True)
         return bol
 
-    def bollinger_bands( self, df, rate=24, n_devs=[ 1, 2, 3 ]):
+    def bollinger_bands( self, df, window=24, n_devs=[ 1, 2, 3 ]):
 
         data = pd.DataFrame([])
         for currency in df.columns:
-            sma = df[currency].rolling(rate).mean()
-            std  = df[currency].rolling(rate).std()
+            sma = df[currency].rolling(window).mean()
+            std  = df[currency].rolling(window).std()
             data[f'{currency}_sma'] = sma
             data[f'{currency}_std'] = std
+            """
             for i in n_devs:
                 data[f'{currency}_+{i}std'] = sma + std * i
                 data[f'{currency}_-{i}std'] = sma - std * i
+            """
         data.index = df.index
 
         return data

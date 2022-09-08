@@ -1,4 +1,7 @@
 
+# author: Marti Llanes & Quantium Rock
+# license: MIT
+
 import numpy as np
 import pandas as pd
 from data import DataSet
@@ -73,6 +76,7 @@ class RiskManagement:
 
 
     def weighted_volatility(self, volatility):
+
         weight = pd.DataFrame([])
         volatility = volatility.copy()
         volatility_T = volatility.T
