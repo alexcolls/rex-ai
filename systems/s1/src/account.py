@@ -1,3 +1,5 @@
+# author: Quantium Rock
+# license: MIT
 
 import json
 from libs.oanda_api import OandaApi

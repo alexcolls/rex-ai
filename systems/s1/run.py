@@ -1,4 +1,14 @@
 
-from dotenv import load_dotenv
+import time
+from datetime import datetime
 
-load_dotenv()
+
+def main():
+
+    return 0
+
+
+if __name__ == '__main__':
+
+    main()
+
