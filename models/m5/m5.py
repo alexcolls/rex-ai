@@ -212,8 +212,8 @@ if __name__ == "__main__":
 
         print('\n', sym)
 
-        params = os.path.exists(__file__[:-3]+'_'+sym+'.h5')
-        # train model or load model
+        params = os.path.exists('p'+__file__[1:2]+'_'+sym+'.h5')
+        # train+validate model or load+test model
         model = None
         if not params:
 
