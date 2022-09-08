@@ -19,7 +19,7 @@ class Account:
         self.account_id = account_id
         self.account = self.getAccount()
         self.positions = self.getPositions()
-        self.exposures = self.getCcyExposures()
+        self.exposures = self.getExposures()
     
 
     def getAccount( self ):
@@ -79,7 +79,7 @@ class Account:
         return positions
 
 
-    def getCcyExposures( self ):
+    def getExposures( self ):
 
         if len(self.positions) == 0:
             return 0
