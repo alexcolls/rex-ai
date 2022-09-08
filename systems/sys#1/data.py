@@ -8,13 +8,12 @@ import pandas as pd
 from pathlib import Path
 from keras.models import load_model
 from apis.oanda_api import OandaApi
-from indicators import Indicators as indics
+from indicators import Indicators
 from config import SYMBOLS, TIMEFRAME, LOOKBACK
 
 
 class DataSet:
-
-    def __init__( self, symbols=SYMBOLS, timeframe=TIMEFRAME, lookback=LOOKBACK ):
+    def __init__(self, symbols=SYMBOLS, timeframe=TIMEFRAME, lookback=LOOKBACK):
 
         # quotes granularity
         self.symbols = symbols
@@ -22,14 +21,13 @@ class DataSet:
         self.lookback = lookback
         self.ccys = self.getCcys()
         self.db_path = os.path.normpath(
-            os.path.join( os.path.dirname(os.path.abspath(__file__)), "../data/series/" )
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/series/")
         )
         # create directories if doesn't exist
         Path(self.db_path).mkdir(parents=True, exist_ok=True)
 
-
     # get currencies [str]
-    def getCcys( self ):
+    def getCcys(self):
         ccys = []
         for sym in self.symbols:
             ccy = sym.split("_")
@@ -40,9 +38,8 @@ class DataSet:
         ccys.sort()
         return ccys
 
-
     # get data by year
-    def getCandles( self ):
+    def getCandles(self):
 
         oanda_api = OandaApi()
 
@@ -123,9 +120,8 @@ class DataSet:
 
         return op, hi, lo, cl, vo
 
-
     # get data by year
-    def normalizeData( self, op, hi, lo, cl ):
+    def normalizeData(self, op, hi, lo, cl):
 
         # create portfolio returns (standarize protfolio prices %)
         logs = (np.log(cl) - np.log(op)) * 100
@@ -137,7 +133,7 @@ class DataSet:
         return logs, rets, vols, higs, lows
 
     # get data by year
-    def reduceDimension( self, logs, rets, vols, higs, lows ):
+    def reduceDimension(self, logs, rets, vols, higs, lows):
 
         ln = len(self.ccys)
 
@@ -178,17 +174,15 @@ class DataSet:
                     idxs[ccy][dtime] = 100
                     last_dt = dtime
                 else:
-                    idxs[ccy][dtime] = idxs[ccy][last_dt] * (
-                        1 + rets[ccy][dtime] / 100
-                    )
+                    idxs[ccy][dtime] = idxs[ccy][last_dt] * (1 + rets[ccy][dtime] / 100)
                     last_dt = dtime
 
         return logs, rets, vols, higs, lows, idxs
 
-
     # make indicators
-    def makeIndicators( self, df ):
+    def makeIndicators(self, df):
 
+        indics = Indicators()
         time = indics.time_standard(df)
         lp = indics.lowpass_filter(df)
         lp_m = indics.lowpass_momentum(df)
@@ -225,29 +219,29 @@ class DataSet:
 
         return data
 
-
-    def makePredictions( self ):
+    def makePredictions(self):
 
         op, hi, lo, cl, vo = self.getCandles()
 
         logs, rets, vols, higs, lows = self.normalizeData(op, hi, lo, cl)
 
-        logs_, rets_, vols_, higs_, lows_, idxs_ = self.reduceDimension(logs, rets, vols, higs, lows)
+        logs_, rets_, vols_, higs_, lows_, idxs_ = self.reduceDimension(
+            logs, rets, vols, higs, lows
+        )
 
         indicators = self.makeIndicators(df=idxs_)
 
         predictions = {}
         for sym in data.symbols:
-            scaler = pickle.load(f'models/s3_{sym}.pkl')
-            X = indicators.filter(regex=f'{sym[:3]}|{sym[4:]}|sin|cos')
+            scaler = pickle.load(f"models/s3_{sym}.pkl")
+            X = indicators.filter(regex=f"{sym[:3]}|{sym[4:]}|sin|cos")
             X = scaler.transform(X)
-            model = load_model(f'models/p3_{sym}.pkl')
+            model = load_model(f"models/p3_{sym}.pkl")
             predictions[sym] = model.predict(X)
 
         print(predictions)
 
         return predictions
-
 
 
 if __name__ == "__main__":
@@ -258,5 +252,3 @@ if __name__ == "__main__":
 
 
 # TODO
-
-
