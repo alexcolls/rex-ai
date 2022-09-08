@@ -25,3 +25,5 @@ ENVIROMENT = 'demo'
 # risk management params
 
 RISK = 0.01
+BALANCE = 100000
+LEVERAGE = 1

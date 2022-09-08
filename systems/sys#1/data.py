@@ -185,6 +185,7 @@ class DataSet:
 
         return logs, rets, vols, higs, lows, idxs
 
+
     # make indicators
     def makeIndicators( self, df ):
 
@@ -254,5 +255,8 @@ if __name__ == "__main__":
     data = DataSet()
 
     data.makePredictions()
+
+
+# TODO
 
 

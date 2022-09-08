@@ -1,36 +1,36 @@
+
+import numpy as np
 import pandas as pd
 from data import DataSet
+from config import RISK, BALANCE, LEVERAGE
 
-RISK = 1
-BALANCE = 100000
-LEVERAGE = 1
-
-
-op, hi, lo, cl, vo = self.getCandles()
 
 class RiskManagement:
 
-    def __init__(self):
+
+    def __init__( self, risk=RISK, balance=BALANCE, leverage=LEVERAGE ):
+
+        self.risk = risk
+        self.balance = balance
+        self.leverage = leverage
         self.data = DataSet()
+      # o, h, l, c  
+        op, hi, lo, cl, _ = self.getCandles()
+        logs, rets, vols, higs, lows = self.data.normalizeData(op, hi, lo, cl)
+        self.logs_, _, _, _, _, self.idxs_ = self.data.reduceDimension(logs, rets, vols, higs, lows)
+        self.predictions = self.data.makePredictions()
 
-    def getPrediction(self):
-        tend_prediction_df = Dat("tendency_pred",1)
-        vol_prediction_df = load_last_rows("volatility_pred",1)
-        return tend_prediction_df, vol_prediction_df
 
-    def getLast(self):
-        primary_df = load_last_rows("closes",1)
-        tertiary_logs_df = load_last_rows("logs_",240)
-        return primary_df, tertiary_logs_df
+    def mean_volatility_prediction(self, dev=2, rate=120):
 
-    def mean_volatility_prediction(self, logs, rate=120):
         data = pd.DataFrame([])
-        for ccy in logs.columns:
-            data[ccy] = logs[ccy].rolling(rate).mean() + logs[ccy].rolling(rate).std()*2
-        data.index = logs.index
+        for ccy in self.logs.columns:
+            data[ccy] = np.abs(self.logs[ccy]).mean() + self.logs[ccy].std()*dev
+        data.index = self.logs.index
         data2 = data.iloc[-1:].copy()
 
         return data, data2
+
 
     def correlation_pairs(self, pred_vols):
 
@@ -73,7 +73,6 @@ class RiskManagement:
         return total_vol, vols
 
 
-
     def weighted_volatility(self, volatility):
         weight = pd.DataFrame([])
         volatility = volatility.copy()
@@ -83,28 +82,28 @@ class RiskManagement:
         return  weight
 
 
-    def read_exchange_rate(self, df):
+    def exchange_rates(self, df, acc_ccy='USD'):
 
         rate = df.iloc[-1:]
 
         data = pd.DataFrame(index=rate.index)
 
         for ccy in rate.columns:
-            if ccy.split("_",2)[0] == "USD":
+            if ccy.split("_",2)[0] == acc_ccy:
                 data[(ccy.split("_")[1])] = rate[ccy]
-            elif ccy.split("_",2)[1] == "USD":
+            elif ccy.split("_",2)[1] == acc_ccy:
                 data[(ccy.split("_")[0])] = 1/rate[ccy]
 
         return data
 
 
-    def trade_signals(self,pred_vols,last_data, classification, exchange_rate, risk=0.01, balance=100000, leverage=1):
-        cor = self.correlation_pairs(last_data)
+    def trade_signals(self, pred_vols, logs, classification, exchange_rate ):
+
+        cor = self.correlation_pairs(logs)
 
         t,v = self.expected_volatility(pred_vols, cor)
         n = int((abs(classification.T)).sum())
-        risked = risk*balance*leverage/(t*n)
-
+        risked = self.risk*self.balance*self.leverage/(t*n)
 
         trade_orders = []
         trade_dataframe = {"datetime":[],"currency":[], "side":[], "size":[]}
@@ -132,3 +131,10 @@ class RiskManagement:
         trade_dataframe.index = pd.to_datetime(trade_dataframe.index)
 
         return trade_orders, trade_dataframe
+
+
+if __name__ == "__main__":
+
+    rm = RiskManagement()
+
+    data.makePredictions()
