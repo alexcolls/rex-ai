@@ -47,7 +47,7 @@ class Predictions:
         ccys.sort()
         return ccys
 
-    # get data by year
+    # get last lookback candles
     def getCandles(self):
 
         oanda_api = OandaApi()
@@ -129,7 +129,7 @@ class Predictions:
 
         return op, hi, lo, cl, vo
 
-    # get data by year
+    # normalize market
     def normalizeData(self, op, hi, lo, cl):
 
         # create portfolio returns (standarize protfolio prices %)
@@ -141,7 +141,7 @@ class Predictions:
 
         return logs, rets, vols, higs, lows
 
-    # get data by year
+    # from symbols to currency indices
     def reduceDimension(self, logs, rets, vols, higs, lows):
 
         ln = len(self.ccys)
@@ -188,10 +188,11 @@ class Predictions:
 
         return logs, rets, vols, higs, lows, idxs
 
-    # make indicators
+    # compute model's indicators = features
     def makeIndicators( self, df ):
 
         indics = Indicators()
+
         time = indics.time_standard(df)
         lp = indics.lowpass_filter(df)
         lp_m = indics.lowpass_momentum(df)
@@ -228,7 +229,7 @@ class Predictions:
 
         return data
 
-    
+    # generate random outputs ( 1, 0, -1 )
     def randomPredictions( self ):
 
         predictions = {}
@@ -237,7 +238,7 @@ class Predictions:
 
         return predictions
 
-
+    # load model params by symbol and output predictions
     def modelPredictions( self ):
 
         op, hi, lo, cl, vo = self.getCandles()
@@ -300,9 +301,9 @@ class Predictions:
 
 if __name__ == "__main__":
 
-    data = Predictions().modelPredictions()
+    predictions = Predictions().modelPredictions()
 
-    print(data)
+    print(predictions)
 
 
 # end
