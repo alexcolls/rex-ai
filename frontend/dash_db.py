@@ -11,7 +11,7 @@ import pandas as pd
 import os
 
 drop_years = []
-path = 'db/data/primary/'
+path = 'models/db/data/primary/'
 
 years = os.listdir(path)
 for yr in years:
