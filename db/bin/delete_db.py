@@ -8,7 +8,7 @@ def deleteDB():
 
     input('\n >  WARNING! Are you sure you want to delete all your database? \n\n > Press Enter to continue or Ctrl-C to exit. \n\n >>>')
 
-    db_path = 'db/data/'
+    db_path = '../db/data/'
     for folder in os.listdir(db_path):
         folder_path = os.path.join(db_path, folder)
         if os.path.isdir(folder_path):
