@@ -4,7 +4,6 @@
 # date: August 2022
 # license: MIT
 
-# dependencies
 import requests
 import json
 import os

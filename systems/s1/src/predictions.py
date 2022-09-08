@@ -7,8 +7,8 @@ import pickle
 import numpy as np
 import pandas as pd
 from keras.models import load_model
-from apis.oanda_api import OandaApi
-from indicators import Indicators
+from libs.oanda_api import OandaApi
+from libs.indicators import Indicators
 
 with open('config.json') as json_file:
     config = json.load(json_file)
