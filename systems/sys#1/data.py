@@ -2,14 +2,13 @@
 # license: MIT
 
 import os
+import pickle
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from keras.models import load_model
-import pickle
-from indicators import Indicators as indics
-from pathlib import Path
 from apis.oanda_api import OandaApi
+from indicators import Indicators as indics
 from config import SYMBOLS, TIMEFRAME, LOOKBACK
 
 
@@ -234,7 +233,7 @@ class DataSet:
 
         logs_, rets_, vols_, higs_, lows_, idxs_ = self.reduceDimension(logs, rets, vols, higs, lows)
 
-        indicators = self.makeIndicators(idxs_)
+        indicators = self.makeIndicators(df=idxs_)
 
         predictions = {}
         for sym in data.symbols:
