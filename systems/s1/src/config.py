@@ -14,7 +14,7 @@ SYMBOLS = [ 'AUD_CAD', 'AUD_CHF', 'AUD_JPY', 'AUD_NZD', 'AUD_USD',
 TIMEFRAME = 'H1'
 
 # time periods length
-LOOKBACK = 24
+LOOKBACK = 120
 
 # trading account number
 ACCOUNT = '101-004-17169350-002'
