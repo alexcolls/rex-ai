@@ -3,9 +3,8 @@
 
 import json
 import numpy as np
-import pandas as pd
-from predictions import Predictions
-from account import Account
+from src.predictions import Predictions
+from src.account import Account
 
 with open('config.json') as json_file:
     config = json.load(json_file)
@@ -25,78 +24,80 @@ class RiskManager( Account, Predictions ):
         self.risk = risk
         self.balance = balance
         self.leverage = leverage
-        self.volatilities, _ = self.mean_volatility_prediction(self.logs)
-        self.correlations = self.correlation_pairs(self.logs)
-        self.variance, self.exp_volatilies = self.expected_volatility(self.volatilities, self.correlations)
-        self.wei_volatilities = self.weighted_volatility(self.exp_volatilies)
+        self.market_volatility, self.sym_vols = self.marketVolatility(self.logs)
+        self.correlations = self.logs.corr()
+        self.variance, self.exp_volatilies = self.expectedVolatility()
+        self.wei_vols = self.weightedVolatilities()
+        self.new_orders = self.makeOrders()
 
 
-    def mean_volatility_prediction(self, logs, n_devs=2 ):
+    def marketVolatility( self, df, devs=2 ):
 
-        data = pd.DataFrame([])
-        for ccy in logs.columns:
-            data[ccy] = np.abs(self.logs[ccy]).mean() + self.logs[ccy].std()*n_devs
-        data.index = self.logs.index
-        data2 = data.iloc[-1:].copy()
+        sym_vols = {}
+        for sym in df.columns:
+            sym_vols[sym] = round(np.abs(df[sym]).mean() + df[sym].std() * devs, 4)
 
-        return data, data2
+        tot_vol = round(np.abs(df[sym]).mean() + df[sym].std() * devs, 4)
 
-
-    def correlation_pairs(self, logs):
-
-        data = pd.DataFrame(index=logs.index)
-
-        for pair in logs.columns:
-            for second_pair in logs.columns:
-                data[f'{pair}_{second_pair}_corr'] = logs[pair].corr(logs[second_pair])
-
-        data.index = logs.index
-        data = data.iloc[-1:].T
-        data.columns = ["correlation"]
-        data = data[round(data["correlation"],6) != 1.000000]
-        data = data.T
-
-        return data
+        return tot_vol, sym_vols
 
 
-    def expected_volatility(self, pred_vol, correlations):
+    def expectedVolatility( self ):
 
-        vols = pred_vol.copy()
-        pred_vol = abs(pred_vol)
-
-        for sym in pred_vol.columns:
-
-            real_vol = 0
-            for sym2 in pred_vol.columns:
-
-                if sym == sym2:
-                    real_vol += pred_vol[sym]
-
+        exp_vols = {}
+        for sym1 in self.sym_vols.keys:
+            cum_vol = 0
+            for sym2 in self.sym_vols.keys:
+                if sym1 == sym2:
+                    cum_vol += self.sym_vols[sym1]
                 else:
-                    real_vol += pred_vol[sym2] * correlations.filter(regex=sym+'_'+sym2).values[0][0]
-
-            vols[sym] = abs(round(real_vol.mean(),6))
-
-        total_vol = vols.mean(axis=1)[0]
-
-        return total_vol, vols
-
-
-    def weighted_volatility(self, volatility):
-
-        weight = pd.DataFrame([])
-        volatility = volatility.copy()
-        volatility_T = volatility.T
-        weight = volatility_T/volatility_T.mean()
-
-        return  weight
-
-
-    def makePositions( self ):
-        
-        for sym, x in self.predictions.iteritems():
-            print(sym, x)
+                    try:
+                        cum_vol += self.sym_vols[sym2] * self.correlations[sym1][sym2]
+                    except:
+                        cum_vol += self.sym_vols[sym2] * self.correlations[sym2][sym1]
             
+            exp_vols[sym1] = abs(round(cum_vol.mean(),6))
+
+        variance = [ x for x in exp_vols.items ]
+        variance = round(np.mean(variance) + np.std(variance), 4)
+
+        return variance, exp_vols
+
+
+    def weightedVolatilities( self ):
+
+        wei_vols = {}
+        for sym in self.symbols_volatility.keys:
+            wei_vols[sym] = self.exp_volatilies/self.variance
+
+        return  wei_vols
+
+
+    def makeOrders( self ):
+
+        self.risk_ratio = round(self.risk / (self.variance/100), 2)
+        self.margin = self.account['NAV'] * self.risk_ratio * self.leverage
+
+        new_orders = {}
+        for sym, p in self.predictions.iteritems():
+            if p == 0:
+                new_orders[sym] = 0
+            else:
+                units = int(self.margin * p * self.wei_vols[sym])
+                if sym[:3] != self.account['ccy']:
+                    try:
+                        units = int(units * self.fx_rates[sym[:3]+'_'+self.account['ccy']])
+                    except:
+                        units = int(units / self.fx_rates[self.account['ccy']+'_'+sym[:3]])
+                
+                new_orders[sym] = units
+
+        return new_orders
+            
+
+    def stopOut( self, minutes=15 ):
+
+        return 0
 
 
 if __name__ == "__main__":
@@ -105,3 +106,5 @@ if __name__ == "__main__":
 
     rm.makePositions()
 
+
+# end

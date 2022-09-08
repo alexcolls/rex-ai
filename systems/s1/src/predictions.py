@@ -7,8 +7,8 @@ import pickle
 import numpy as np
 import pandas as pd
 from keras.models import load_model
-from libs.oanda_api import OandaApi
-from libs.indicators import Indicators
+from src.libs.oanda_api import OandaApi
+from src.libs.indicators import Indicators
 
 with open('config.json') as json_file:
     config = json.load(json_file)
@@ -18,9 +18,11 @@ TIMEFRAME = config['TIMEFRAME']
 LOOKBACK = config['LOOKBACK']
 
 
-class Predictions:
+class Predictions( OandaApi ):
 
     def __init__(self, symbols=SYMBOLS, timeframe=TIMEFRAME, lookback=LOOKBACK):
+
+        super(OandaApi, self).__init__()
 
         self.symbols = symbols
         self.timeframe = timeframe
@@ -30,9 +32,12 @@ class Predictions:
         )
         self.ccys = self.getCcys()
         op, hi, lo, cl, _ = self.getCandles()
-        self.fx_rates = cl
-        self.logs, rets, vols, higs, lows = self.normalizeData(op, hi, lo,cl)
-        self.logs_, _, _, _, _, self.idxs_ = self.reduceDimension(self.logs, rets, vols, higs, lows)
+        logs, rets, vols, higs, lows = self.normalizeData(op, hi, lo,cl)
+        logs_, _, _, _, _, idxs_ = self.reduceDimension(logs, rets, vols, higs, lows)
+        self.fx_rates = cl.iloc[-1]
+        self.logs = logs
+        self.logs_ = logs_
+        self.idxs_ = idxs_
         self.predictions = self.randomPredictions()
 
     # get currencies [str]
@@ -49,8 +54,6 @@ class Predictions:
 
     # get last lookback candles
     def getCandles(self):
-
-        oanda_api = OandaApi()
 
         # init daily dataframes indices for asks & bids
         op = pd.DataFrame()
@@ -74,8 +77,8 @@ class Predictions:
                 "volume": [],
             }
 
-            # request 5000 bars from oanda rest-api
-            req = oanda_api.getLastCandles(symbol, self.timeframe, count=self.lookback)
+            # request max 5000 bars from oanda rest-api
+            req = self.getLastCandles(symbol, self.timeframe, count=self.lookback*2)
 
             # iterate each candle
             for x in req:

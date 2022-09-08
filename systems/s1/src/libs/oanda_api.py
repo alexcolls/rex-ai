@@ -226,7 +226,7 @@ class OandaApi:
     # open new order on a specific instrument & account
     def postOrder ( self, account_id, instrument, units, order_type='MARKET', time_in_force='FOK' ):
 
-        data = { "order": {
+        order = { "order": {
                 "type": order_type,
                 "positionFill": "DEFAULT",
                 "instrument": instrument,
@@ -234,10 +234,10 @@ class OandaApi:
                 "units": str(units)
                 } }
                 
-        data = json.dumps(data, indent=4) 
+        order = json.dumps(order, indent=4) 
 
         try:
-            req = self.client.post( f"{self.enviroment}/{self.api_version}/accounts/{account_id}/orders", data=str(data) )
+            req = self.client.post( f"{self.enviroment}/{self.api_version}/accounts/{account_id}/orders", data=str(order) )
             return json.loads(req.content.decode("utf-8"))
         except Exception as e:
             print(e)

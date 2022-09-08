@@ -1,6 +1,7 @@
 
 import time
 from datetime import datetime
+from src.executor import Executor
 
 
 def main():
@@ -10,5 +11,8 @@ def main():
 
 if __name__ == '__main__':
 
-    main()
+    while True:
+        time.sleep(60)
+        timestamp = datetime.utcnow()
+        print()
 

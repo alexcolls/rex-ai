@@ -2,8 +2,8 @@
 # license: MIT
 
 import json
-from libs.oanda_api import OandaApi
 from datetime import datetime
+from src.libs.oanda_api import OandaApi
 
 with open('config.json') as json_file:
     config = json.load(json_file)
