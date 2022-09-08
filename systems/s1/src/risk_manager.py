@@ -94,9 +94,10 @@ class RiskManager( Account, Predictions ):
     
 
     
-    def makeOrders( self ):
+    def makePositions( self ):
         
         for x in self.predictions:
+            pass
             
 
     def exchange_rates(self, df, units):

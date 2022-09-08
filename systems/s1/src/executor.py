@@ -1,7 +1,9 @@
+# author: Quantium Rock & Roger Sole
+# license: MIT
 
 import pandas as pd
 from datetime import datetime, timezone
-from apis.oanda_api import OandaApi
+from libs.oanda_api import OandaApi
 from risk_manager import RiskManager
 
 
