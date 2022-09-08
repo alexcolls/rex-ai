@@ -1,22 +1,20 @@
 
 import json
-from apis.oanda_api import OandaApi
+from libs.oanda_api import OandaApi
 from datetime import datetime
 
 with open('config.json') as json_file:
     config = json.load(json_file)
 
 ACCOUNT = config['ACCOUNT']
-SYMBOLS = config['SYMBOLS']
 
 
 class Account:
 
-    def __init__( self, account_id=ACCOUNT, symbols=SYMBOLS ):
+    def __init__( self, account_id=ACCOUNT ):
         
         self.oa = OandaApi()
         self.account_id = account_id
-        self.symbols = symbols
         self.account = self.getAccount()
         self.positions = self.getPositions()
         self.exposures = self.getCcyExposures()

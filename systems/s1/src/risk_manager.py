@@ -24,33 +24,32 @@ class RiskManager( Account, Predictions ):
         self.risk = risk
         self.balance = balance
         self.leverage = leverage
-        self.predictions = Predictions()
-        op, hi, lo, cl, _ = self.getCandles()
-        self.quotes = cl
-        logs, rets, vols, higs, lows = self.data.normalizeData(op, hi, lo,cl)
-        self.logs_, _, _, _, _, self.idxs_ = self.data.reduceDimension(logs, rets, vols, higs, lows)
-        self.predictions = self.data.makePredictions()
+        self.volatilities, _ = self.mean_volatility_prediction()
+        self.correlations = self.correlation_pairs(self.logs)
+        self.variance, self.exp_volatilies = self.expected_volatility(self.volatilities, self.correlations)
+        self.wei_volatilities = self.weighted_volatility(self.exp_volatilies)
+        self.fx_rates = self.exchange_rates(self.fx_rates)
 
 
-    def mean_volatility_prediction(self, dev=2, rate=120):
+    def mean_volatility_prediction(self, n_devs=2 ):
 
         data = pd.DataFrame([])
         for ccy in self.logs.columns:
-            data[ccy] = np.abs(self.logs[ccy]).mean() + self.logs[ccy].std()*dev
+            data[ccy] = np.abs(self.logs[ccy]).mean() + self.logs[ccy].std()*n_devs
         data.index = self.logs.index
         data2 = data.iloc[-1:].copy()
 
         return data, data2
 
 
-    def correlation_pairs(self, pred_vols):
+    def correlation_pairs(self, logs):
 
-        data = pd.DataFrame(index=pred_vols.index)
-        for pair in pred_vols.columns:
-            for second_pair in pred_vols.columns:
-                data[f'{pair}_{second_pair}_corr'] = pred_vols[pair].corr(pred_vols[second_pair])
+        data = pd.DataFrame(index=logs.index)
+        for pair in logs.columns:
+            for second_pair in logs.columns:
+                data[f'{pair}_{second_pair}_corr'] = logs[pair].corr(logs[second_pair])
 
-        data.index = pred_vols.index
+        data.index = logs.index
         data = data.iloc[-1:].T
         data.columns = ["correlation"]
         data = data[round(data["correlation"],6) != 1.000000]
@@ -63,7 +62,6 @@ class RiskManager( Account, Predictions ):
 
         vols = pred_vol.copy()
         pred_vol = abs(pred_vol)
-
 
         for sym in pred_vol.columns:
 
@@ -80,7 +78,6 @@ class RiskManager( Account, Predictions ):
 
         total_vol = vols.mean(axis=1)[0]
 
-
         return total_vol, vols
 
 
@@ -89,18 +86,28 @@ class RiskManager( Account, Predictions ):
         weight = pd.DataFrame([])
         volatility = volatility.copy()
         volatility_T = volatility.T
-        weight = volatility_T/ volatility_T.mean()
+        weight = volatility_T/volatility_T.mean()
 
         return  weight
 
 
-    def exchange_rates(self, df, acc_ccy='USD'):
+    
+
+    
+    def makeOrders( self ):
+        
+        for x in self.predictions:
+            
+
+    def exchange_rates(self, df, units):
 
         rate = df.iloc[-1:]
 
         data = pd.DataFrame(index=rate.index)
 
-        for ccy in rate.columns:
+        acc_ccy = self.account['ccy']
+
+        for ccy in self.symbols:
             if ccy.split("_",2)[0] == acc_ccy:
                 data[(ccy.split("_")[1])] = rate[ccy]
             elif ccy.split("_",2)[1] == acc_ccy:
@@ -147,5 +154,5 @@ class RiskManager( Account, Predictions ):
 
 if __name__ == "__main__":
 
-    rm = RiskManagement()
+    rm = RiskManager()
 

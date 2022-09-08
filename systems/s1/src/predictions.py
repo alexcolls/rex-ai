@@ -22,14 +22,18 @@ class Predictions:
 
     def __init__(self, symbols=SYMBOLS, timeframe=TIMEFRAME, lookback=LOOKBACK):
 
-        # quotes granularity
         self.symbols = symbols
         self.timeframe = timeframe
         self.lookback = lookback
-        self.ccys = self.getCcys()
         self.db_path = os.path.normpath(
             os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/series/")
         )
+        self.ccys = self.getCcys()
+        op, hi, lo, cl, _ = self.getCandles()
+        self.fx_rates = cl
+        self.logs, rets, vols, higs, lows = self.normalizeData(op, hi, lo,cl)
+        self.logs_, _, _, _, _, self.idxs_ = self.reduceDimension(self.logs, rets, vols, higs, lows)
+        self.predictions = self.randomPredictions()
 
     # get currencies [str]
     def getCcys(self):
@@ -184,7 +188,6 @@ class Predictions:
 
         return logs, rets, vols, higs, lows, idxs
 
-
     # make indicators
     def makeIndicators( self, df ):
 
@@ -235,7 +238,7 @@ class Predictions:
         return predictions
 
 
-    def makePredictions( self ):
+    def modelPredictions( self ):
 
         op, hi, lo, cl, vo = self.getCandles()
 
@@ -295,10 +298,9 @@ class Predictions:
         return pd.DataFrame.from_dict(predictions)
 
 
-
 if __name__ == "__main__":
 
-    data = Predictions().randomPredictions()
+    data = Predictions().modelPredictions()
 
     print(data)
 
