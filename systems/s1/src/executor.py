@@ -1,23 +1,30 @@
+
 import pandas as pd
 from datetime import datetime, timezone
 from apis.oanda_api import OandaApi
-from config import ACCOUNT
+from risk_manager import RiskManager
 
 
-def create_orders(df: pd.DataFrame, units: int = 1000) -> None:
+class Executor( RiskManager ):
 
-    oapi = OandaApi()
+    def __init__( self ):
 
-    orders = df.loc[:, df.values[0] != 0]
+        super().__init__()
 
-    for order, value in zip(orders, orders.values[0]):
-        units = value * units
-        try:
-            oapi.postOrder(ACCOUNT, order, units)
-        except:
-            print(f"Error in order: {ACCOUNT, order, units}")
+    def create_orders( self, df: pd.DataFrame, units: int=1000) -> None:
 
-    return
+        oapi = OandaApi()
+
+        orders = df.loc[:, df.values[0] != 0]
+
+        for order, value in zip(orders, orders.values[0]):
+            units = value * units
+            try:
+                oapi.postOrder(self.account, order, units)
+            except:
+                print(f"Error in order: {self.account, order, units}")
+
+        return True
 
 
 if __name__ == "__main__":

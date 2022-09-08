@@ -9,7 +9,6 @@ import requests
 import json
 import os
 
-
 # api client
 class OandaApi:
 
@@ -29,16 +28,14 @@ class OandaApi:
 
     def __init__( self, PRIVATE_KEY=False, LIVE_TRADING=False ):
 
-        # upload Onada authenthification ./keys/oanda.json
+        # upload Onada authenthification secret key
         APIKEY_PATH = os.path.normpath(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "oanda_key.json")
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../config.json")
         )
-        with open(APIKEY_PATH) as x:
-            self.__auth__ = json.load(x)
+        with open(APIKEY_PATH) as config:
+            self.__auth__ = json.load(config)
 
-        self.TOKEN = self.__auth__["PUBLIC_TOKEN"]
-        if PRIVATE_KEY:
-            self.TOKEN = self.__auth__["PRIVATE_TOKEN"]
+        self.TOKEN = self.__auth__["OANDA_KEY"]
 
         # set trading enviroment
         self.enviroment = self.ENVIRONMENTS["no_trading"]["api"]

@@ -1,4 +1,23 @@
 {
+
+  "SYSTEM": "s1",
+
+  "OANDA_KEY": "1b110bbb8e41f23b235b8fc15ecdaa74-c8b99b9b7f054378259f57e09673b7fb",
+
+  "ACCOUNT": "101-012-23186816-002",
+
+  "ENVIROMENT": "demo",
+
+  "TIMEFRAME": "H1",
+
+  "LOOKBACK": 120,
+
+  "RISK_ALLOWANCE": 0.01,
+
+  "BALANCE": 100000,
+
+  "MAX_LEVERAGE": 3,
+
   "SYMBOLS": [
     "AUD_CAD",
     "AUD_CHF",
@@ -28,23 +47,6 @@
     "USD_CAD",
     "USD_CHF",
     "USD_JPY"
-  ],
+  ]
 
-  "TIMEFRAME": "H1",
-
-  "LOOKBACK": 120,
-
-  "ACCOUNT": "101-012-23186816-002",
-
-  "OANDA_TOKEN": "1b110bbb8e41f23b235b8fc15ecdaa74-c8b99b9b7f054378259f57e09673b7fb",
-
-  "ENVIROMENT": "demo",
-
-  "RISK_ALLOWANCE": 0.01,
-
-  "BALANCE": 100000,
-
-  "MAX_LEVERAGE": 3,
-
-  "SYSTEM": "s1"
 }

@@ -2,14 +2,20 @@
 # license: MIT
 
 import os
+import json
 import pickle
 import numpy as np
 import pandas as pd
-from pathlib import Path
 from keras.models import load_model
 from apis.oanda_api import OandaApi
 from indicators import Indicators
-from config import SYMBOLS, TIMEFRAME, LOOKBACK
+
+with open('config.json') as json_file:
+    config = json.load(json_file)
+
+SYMBOLS = config['SYMBOLS'] 
+TIMEFRAME = config['TIMEFRAME']
+LOOKBACK = config['LOOKBACK']
 
 
 class Predictions:

@@ -15,7 +15,6 @@ from config import SYMBOLS, TIMEFRAME, START_YEAR
 
 class PrimaryData:
 
-    ## class constructor
     def __init__(self, symbols=SYMBOLS, timeframe=TIMEFRAME, start_year=START_YEAR):
 
         # quotes granularity default=5_second_bars

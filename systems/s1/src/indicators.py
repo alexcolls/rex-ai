@@ -2,11 +2,16 @@
 # author: Marti Llanes
 # license: MIT
 
+import json
+import math
 import pandas as pd
 import numpy as np
-import math
 import scipy.signal as sig
-from config import SYMBOLS
+
+with open('config.json') as json_file:
+    config = json.load(json_file)
+
+SYMBOLS = config['SYMBOLS'] 
 
 
 ### INDICATORS LIBRARY ###

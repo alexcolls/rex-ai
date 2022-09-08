@@ -2,23 +2,32 @@
 # author: Marti Llanes & Quantium Rock
 # license: MIT
 
+import json
 import numpy as np
 import pandas as pd
-from data import DataSet
-from config import RISK, BALANCE, LEVERAGE
+from predictions import Predictions
+from account import Account
+
+with open('config.json') as json_file:
+    config = json.load(json_file)
+
+RISK = config['RISK']
+BALANCE = config['BALANCE']
+LEVERAGE = config['LEVERAGE']
 
 
-class RiskManagement:
+class RiskManager( Account, Predictions ):
 
     def __init__( self, risk=RISK, balance=BALANCE, leverage=LEVERAGE ):
 
+        super().__init__()
         self.risk = risk
         self.balance = balance
         self.leverage = leverage
-        self.data = DataSet()
-      # o, h, l, c  
+        self.predictions = Predictions()
         op, hi, lo, cl, _ = self.getCandles()
-        logs, rets, vols, higs, lows = self.data.normalizeData(op, hi, lo, cl)
+        self.quotes = cl
+        logs, rets, vols, higs, lows = self.data.normalizeData(op, hi, lo,cl)
         self.logs_, _, _, _, _, self.idxs_ = self.data.reduceDimension(logs, rets, vols, higs, lows)
         self.predictions = self.data.makePredictions()
 

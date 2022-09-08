@@ -9,6 +9,7 @@ from data_primary import PrimaryData
 
 
 class SecondaryData(PrimaryData):
+    
     def __init__(self):
 
         super().__init__()

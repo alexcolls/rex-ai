@@ -1,13 +1,19 @@
 
-from config import ACCOUNT, SYMBOLS
+import json
 from apis.oanda_api import OandaApi
 from datetime import datetime
+
+with open('config.json') as json_file:
+    config = json.load(json_file)
+
+ACCOUNT = config['ACCOUNT']
+SYMBOLS = config['SYMBOLS']
 
 
 class Account:
 
-
     def __init__( self, account_id=ACCOUNT, symbols=SYMBOLS ):
+        
         self.oa = OandaApi()
         self.account_id = account_id
         self.symbols = symbols
@@ -18,7 +24,10 @@ class Account:
 
     def getAccount( self ):
 
-        req = self.oa.getSummary(self.account_id)
+        try:
+            req = self.oa.getSummary(self.account_id)
+        except:
+            return 0
 
         account = {}
         account['dt'] = req['createdTime']
@@ -38,9 +47,9 @@ class Account:
 
     def getPositions( self ):
 
-        req = self.oa.getOpenPositions(self.account_id)
-
-        if len(req) == 0:
+        try:
+            req = self.oa.getOpenPositions(self.account_id)
+        except:
             return 0
 
         positions = []
