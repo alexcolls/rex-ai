@@ -24,8 +24,6 @@ class Predictions:
         self.db_path = os.path.normpath(
             os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/series/")
         )
-        # create directories if doesn't exist
-        Path(self.db_path).mkdir(parents=True, exist_ok=True)
 
     # get currencies [str]
     def getCcys(self):
@@ -228,7 +226,7 @@ class Predictions:
         for sym in self.symbols:
             predictions[sym] = np.random.randint(-1, 2, 1)[0]
 
-        return pd.DataFrame.from_dict(predictions)
+        return predictions
 
 
     def makePredictions( self ):
@@ -299,4 +297,4 @@ if __name__ == "__main__":
     print(data)
 
 
-# TODO
+# end

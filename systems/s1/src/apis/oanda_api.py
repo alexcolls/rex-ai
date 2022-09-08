@@ -75,17 +75,16 @@ class OandaApi:
 
      
     # return the account state (NAV, PnL, margin, accCurrency, etc)
-    def getSummary( self, account_id ):
+    def getSummary( self, account_id=None ):
         
         if account_id is None:
             account_id = self.accounts[0]
 
-        req = 0
         try:
             req = self.client.get(
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/summary"
             )
-            return json.loads(req.content.decode("utf-8"))['accounts']
+            return json.loads(req.content.decode("utf-8"))['account']
         except Exception as e:
             print(e)
 
@@ -96,7 +95,6 @@ class OandaApi:
         if account_id is None:
             account_id = self.accounts[0]
 
-        req = 0
         try:
             req = self.client.get(
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/instruments"
@@ -112,7 +110,6 @@ class OandaApi:
         if account_id is None:
             account_id = self.accounts[0]
 
-        req = 0
         try:
             req = self.client.get(
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/openPositions"
@@ -128,7 +125,6 @@ class OandaApi:
         if account_id is None:
             account_id = self.accounts[0]
 
-        req = 0
         try:
             req = self.client.get(
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/positions"
@@ -144,7 +140,6 @@ class OandaApi:
         if account_id is None:
             account_id = self.accounts[0]
 
-        req = 0
         try:
             req = self.client.get(
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/openTrades"
@@ -160,7 +155,6 @@ class OandaApi:
         if account_id is None:
             account_id = self.accounts[0]
 
-        req = 0
         try:
             req = self.client.get(
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/openTrades"
@@ -176,7 +170,6 @@ class OandaApi:
         if account_id is None:
             account_id = self.accounts[0]
 
-        req = 0
         try:
             req = self.client.get(
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/pendingOrders"
@@ -192,7 +185,6 @@ class OandaApi:
         if account_id is None:
             account_id = self.accounts[0]
 
-        req = 0
         try:
             req = self.client.get(
                 f"{self.enviroment}/{self.api_version}/accounts/{account_id}/openTrades"
