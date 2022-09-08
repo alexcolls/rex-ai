@@ -2,23 +2,12 @@
 # license: MIT
 
 import os
-import math
 import numpy as np
 import pandas as pd
-import scipy.signal as sig
 from pathlib import Path
-from indicators import (
-    rsi,
-    ema,
-    highpass_filter,
-    lowpass_filter,
-    time_standard,
-    sharpe_ratio,
-    lowpass_momentum,
-    highpass_momentum,
-    ema_diff,
-    bollinger_small,
-)
+from keras.models import load_model
+import pickle
+from indicators import Indicators as indics
 from pathlib import Path
 from apis.oanda_api import OandaApi
 from config import SYMBOLS, TIMEFRAME, LOOKBACK
@@ -26,7 +15,7 @@ from config import SYMBOLS, TIMEFRAME, LOOKBACK
 
 class DataSet:
 
-    def __init__(self, symbols=SYMBOLS, timeframe=TIMEFRAME, lookback=LOOKBACK):
+    def __init__( self, symbols=SYMBOLS, timeframe=TIMEFRAME, lookback=LOOKBACK ):
 
         # quotes granularity
         self.symbols = symbols
@@ -39,6 +28,7 @@ class DataSet:
         # create directories if doesn't exist
         Path(self.db_path).mkdir(parents=True, exist_ok=True)
 
+
     # get currencies [str]
     def getCcys( self ):
         ccys = []
@@ -50,6 +40,7 @@ class DataSet:
                 ccys.append(ccy[1])
         ccys.sort()
         return ccys
+
 
     # get data by year
     def getCandles( self ):
@@ -133,6 +124,7 @@ class DataSet:
 
         return op, hi, lo, cl, vo
 
+
     # get data by year
     def normalizeData( self, op, hi, lo, cl ):
 
@@ -197,22 +189,22 @@ class DataSet:
     # make indicators
     def makeIndicators( self, df ):
 
-        time = time_standard(df)
-        lp = lowpass_filter(df)
-        lp_m = lowpass_momentum(df)
-        hp = highpass_filter(df)
-        hp_m = highpass_momentum(df)
-        r8 = rsi(df, window=8)
-        r24 = rsi(df, window=24)
-        r120 = rsi(df, window=120)
-        e8 = ema(df, window=8)
-        e24 = ema(df, window=24)
-        e120 = ema(df, window=120)
-        ed8 = ema_diff(df, window=8)
-        ed24 = ema_diff(df, window=24)
-        ed120 = ema_diff(df, window=120)
-        s = sharpe_ratio(df, window=24)
-        b = bollinger_small(df, rate=24)
+        time = indics.time_standard(df)
+        lp = indics.lowpass_filter(df)
+        lp_m = indics.lowpass_momentum(df)
+        hp = indics.highpass_filter(df)
+        hp_m = indics.highpass_momentum(df)
+        r8 = indics.rsi(df, window=8)
+        r24 = indics.rsi(df, window=24)
+        r120 = indics.rsi(df, window=120)
+        e8 = indics.ema(df, window=8)
+        e24 = indics.ema(df, window=24)
+        e120 = indics.ema(df, window=120)
+        ed8 = indics.ema_diff(df, window=8)
+        ed24 = indics.ema_diff(df, window=24)
+        ed120 = indics.ema_diff(df, window=120)
+        sr = indics.sharpe_ratio(df, window=24)
+        bb = indics.bollinger_bands(df, rate=24)
 
         data = lp.join(hp)
         data = data.join(lp_m)
@@ -223,8 +215,8 @@ class DataSet:
         data = data.join(e8)
         data = data.join(e24)
         data = data.join(e120)
-        data = data.join(s)
-        data = data.join(b)
+        data = data.join(sr)
+        data = data.join(bb)
         data = data.join(ed8)
         data = data.join(ed24)
         data = data.join(ed120)
@@ -234,18 +226,34 @@ class DataSet:
         return data
 
 
+    def makePredictions( self ):
+
+        op, hi, lo, cl, vo = self.getCandles()
+
+        logs, rets, vols, higs, lows = self.normalizeData(op, hi, lo, cl)
+
+        logs_, rets_, vols_, higs_, lows_, idxs_ = self.reduceDimension(logs, rets, vols, higs, lows)
+
+        indicators = self.makeIndicators(idxs_)
+
+        predictions = {}
+        for sym in data.symbols:
+            scaler = pickle.load(f'models/s3_{sym}.pkl')
+            X = indicators.filter(regex=f'{sym[:3]}|{sym[4:]}|sin|cos')
+            X = scaler.transform(X)
+            model = load_model(f'models/p3_{sym}.pkl')
+            predictions[sym] = model.predict(X)
+
+        print(predictions)
+
+        return predictions
+
+
 
 if __name__ == "__main__":
 
     data = DataSet()
 
-    op, hi, lo, cl, vo = data.getCandles()
-
-    logs, rets, vols, higs, lows = data.normalizeData(op, hi, lo, cl, vo)
-
-    logs_, rets_, vols_, higs_, lows_, idxs_ = data.reduceDimension(logs, rets, vols, higs, lows)
-
-    features = data.makeIndicators(idxs_)
-
+    data.makePredictions()
 
 

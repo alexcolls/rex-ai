@@ -12,16 +12,15 @@ from keras.models import load_model
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 import matplotlib.pyplot as plt
-from pathlib import Path
 import pickle
 import csv
 
 # LSTM model parameters
-LAYERS = 7
+LAYERS = 4
 NEURONS = 100 # updated automatically after knowing X features
-LOOKBACK = 120
+LOOKBACK = 24
 EPOCHS = 100
-THRESHOLD = 0.05 # volatility % bellow = 0
+THRESHOLD = 0.07 # volatility % bellow = 0
 TRAIN_YEAR = 2018
 VALID_YEAR = 2021
 TEST_YEAR = 2022
@@ -31,7 +30,7 @@ SYMBOLS = []
 
 
 # prepare X and y tensors
-def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=LOOKBACK, load_SYMBOLS=False ):
+def prepData( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=LOOKBACK, load_SYMBOLS=False ):
    
    ### TARGETS ###
 
@@ -87,7 +86,7 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
     X = scaler.fit_transform(X)
 
     # export pipeline as pickle file
-    with open("scaler.pkl", "wb") as file:
+    with open('s3_'+symbol+'.pkl', 'wb') as file:
         pickle.dump(scaler, file)
 
     # make sequences and output tensors
@@ -113,7 +112,7 @@ def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THR
 
 
 # construct a sequential network
-def buildModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
+def buildModel( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
 
     print('\n> Building the LSTM model')
 
@@ -149,7 +148,7 @@ def buildModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
 
 
 # train & validate the network
-def trainModel ( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
+def trainModel( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
 
     early_stopping = EarlyStopping(monitor='accuracy', patience=10, mode='min', restore_best_weights=True)
 
@@ -163,7 +162,7 @@ def trainModel ( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
 
 
 # plot learning scores
-def plotHistory ( history ):
+def plotHistory( history ):
 
     # summarize history for accuracy
     plt.plot(history.history['accuracy'])
@@ -187,7 +186,7 @@ def plotHistory ( history ):
 
 
 # write testing scores
-def makeScores ( symbol, accuracy, loss, dataset='train' ):
+def makeScores( symbol, accuracy, loss, dataset='train' ):
 
     file = dataset+'_scores.csv'
 

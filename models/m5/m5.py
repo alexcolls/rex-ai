@@ -155,7 +155,8 @@ def trainModel( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
 
     history = model.fit(X , y, epochs=epochs, batch_size=LOOKBACK, verbose=1, callbacks=[early_stopping], validation_data=(X_val, y_val))
 
-    model.save(__file__[:-3]+'_'+symbol+'.h5')
+    # save model best params (p)
+    model.save('p'+__file__[1:2]+'_'+symbol+'.h5')
 
     if plot: plotHistory(history)
 
@@ -247,7 +248,7 @@ if __name__ == "__main__":
             X_test, y_test = prepData(sym, TEST_YEAR, FINAL_YEAR)
 
             # load model's params
-            model = load_model(__file__[:-3]+'_'+sym+'.h5')
+            model = load_model('p'+__file__[1:2]+'_'+sym+'.h5')
 
             # test
             results = model.evaluate(X_val, y_val)
