@@ -1,22 +1,22 @@
 import pandas as pd
-
+from data import DataSet
 
 RISK = 1
 BALANCE = 100000
 LEVERAGE = 1
 
 
-class RiskManagement():
+op, hi, lo, cl, vo = self.getCandles()
+
+class RiskManagement:
 
     def __init__(self):
-        pass
+        self.data = DataSet()
 
     def getPrediction(self):
-        tend_prediction_df = load_last_rows("tendency_pred",1)
+        tend_prediction_df = Dat("tendency_pred",1)
         vol_prediction_df = load_last_rows("volatility_pred",1)
         return tend_prediction_df, vol_prediction_df
-
-
 
     def getLast(self):
         primary_df = load_last_rows("closes",1)
