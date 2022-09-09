@@ -234,7 +234,7 @@ class OandaApi:
 
         try:
             req = self.client.post( f"{self.enviroment}/{self.api_version}/accounts/{account_id}/orders", data=str(data) )
-            print(req.content)
+            print('\n', req.content)
             return json.loads(req.content.decode("utf-8"))
         except Exception as e:
             print(e)
