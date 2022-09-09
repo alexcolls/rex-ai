@@ -18,8 +18,8 @@ class RiskManager( Account, Predictions ):
 
     def __init__( self, risk=RISK, balance=BALANCE, leverage=LEVERAGE ):
 
-        super(Account, self).__init__()
-        super(Predictions, self).__init__()
+        Account.__init__(self)
+        Predictions.__init__(self)
 
         self.risk = risk
         self.balance = balance
@@ -45,9 +45,9 @@ class RiskManager( Account, Predictions ):
     def expectedVolatility( self ):
 
         exp_vols = {}
-        for sym1 in self.sym_vols.keys:
+        for sym1 in self.sym_vols.keys():
             cum_vol = 0
-            for sym2 in self.sym_vols.keys:
+            for sym2 in self.sym_vols.keys():
                 if sym1 == sym2:
                     cum_vol += self.sym_vols[sym1]
                 else:
@@ -58,8 +58,8 @@ class RiskManager( Account, Predictions ):
             
             exp_vols[sym1] = abs(round(cum_vol.mean(),6))
 
-        variance = [ x for x in exp_vols.items ]
-        variance = round(np.mean(variance) + np.std(variance), 4)
+        vols = [ x for x in exp_vols.values() ]
+        variance = round(np.mean(vols, axis=0) + np.std(vols, axis=0), 4)
 
         return variance, exp_vols
 
@@ -67,8 +67,8 @@ class RiskManager( Account, Predictions ):
     def weightedVolatilities( self ):
 
         wei_vols = {}
-        for sym in self.symbols_volatility.keys:
-            wei_vols[sym] = self.exp_volatilies/self.variance
+        for sym in self.sym_vols.keys():
+            wei_vols[sym] = round(self.exp_volatilies[sym]/self.variance, 2)
 
         return  wei_vols
 
@@ -76,19 +76,19 @@ class RiskManager( Account, Predictions ):
     def makeOrders( self ):
 
         self.risk_ratio = round(self.risk / (self.variance/100), 2)
-        self.margin = self.account['NAV'] * self.risk_ratio * self.leverage
+        self.margin = self.account_state['NAV'] * self.risk_ratio * self.leverage
 
         new_orders = {}
-        for sym, p in self.predictions.iteritems():
+        for sym, p in self.predictions.items():
             if p == 0:
                 new_orders[sym] = 0
             else:
                 units = int(self.margin * p * self.wei_vols[sym])
-                if sym[:3] != self.account['ccy']:
+                if sym[:3] != self.account_state['ccy']:
                     try:
-                        units = int(units * self.fx_rates[sym[:3]+'_'+self.account['ccy']])
+                        units = int(units * self.fx_rates[sym[:3]+'_'+self.account_state['ccy']])
                     except:
-                        units = int(units / self.fx_rates[self.account['ccy']+'_'+sym[:3]])
+                        units = int(units / self.fx_rates[self.account_state['ccy']+'_'+sym[:3]])
                 
                 new_orders[sym] = units
 

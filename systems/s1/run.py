@@ -4,15 +4,30 @@ from datetime import datetime
 from src.executor import Executor
 
 
-def main():
+class Main( Executor ):
 
-    return 0
+    def __init__( self ):
+
+        super().__init__()
+
+
+    def trade( self ):
+        self.sendOrders(self.new_orders)
+
+    def appendData( self ):
+        pass
+
+    def uploadGBQ( self ):
+        pass
+
 
 
 if __name__ == '__main__':
 
+    algo = Main()
+
     while True:
         time.sleep(60)
         timestamp = datetime.utcnow()
-        print()
-
+        print(timestamp)
+        algo.trade()

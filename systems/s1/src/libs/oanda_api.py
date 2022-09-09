@@ -4,9 +4,13 @@
 # date: August 2022
 # license: MIT
 
-import requests
 import json
-import os
+import requests
+
+with open('config.json') as json_file:
+    config = json.load(json_file)
+
+TOKEN = config['OANDA_KEY'] 
 
 # api client
 class OandaApi:
@@ -25,26 +29,18 @@ class OandaApi:
         },
     }
 
-    def __init__( self, PRIVATE_KEY=False, LIVE_TRADING=False ):
+    def __init__( self, token=TOKEN, live_trading=False ):
 
-        # upload Onada authenthification secret key
-        APIKEY_PATH = os.path.normpath(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../config.json")
-        )
-        with open(APIKEY_PATH) as config:
-            self.__auth__ = json.load(config)
-
-        self.TOKEN = self.__auth__["OANDA_KEY"]
-
+        # oanda authentification
+        self.token = token
         # set trading enviroment
         self.enviroment = self.ENVIRONMENTS["no_trading"]["api"]
-        if LIVE_TRADING:
+        if live_trading:
             self.enviroment = self.ENVIRONMENTS["live"]["api"]
-
         # set request session  and add authentification metadata
         self.client = requests.Session()
-        self.client.headers["Authorization"] = "Bearer " + self.TOKEN
-        self.client.headers['Content-Type'] = 'application/json'      
+        self.client.headers["Authorization"] = "Bearer " + self.token
+        self.client.headers['Content-Type'] = 'application/json'
         self.api_version = 'v3'
         self.accounts = self.getAccounts()
 
@@ -226,21 +222,22 @@ class OandaApi:
     # open new order on a specific instrument & account
     def postOrder ( self, account_id, instrument, units, order_type='MARKET', time_in_force='FOK' ):
 
-        order = { "order": {
-                "type": order_type,
-                "positionFill": "DEFAULT",
-                "instrument": instrument,
-                "timeInForce": time_in_force,
-                "units": str(units)
+        data = { "order": {
+                    "type": order_type,
+                    "positionFill": "DEFAULT",
+                    "instrument": instrument,
+                    "timeInForce": time_in_force,
+                    "units": str(units)
                 } }
                 
-        order = json.dumps(order, indent=4) 
+        data = json.dumps(data, indent=4)
 
         try:
-            req = self.client.post( f"{self.enviroment}/{self.api_version}/accounts/{account_id}/orders", data=str(order) )
+            req = self.client.post( f"{self.enviroment}/{self.api_version}/accounts/{account_id}/orders", data=str(data) )
+            print(req.content)
             return json.loads(req.content.decode("utf-8"))
         except Exception as e:
             print(e)
 
 
-#__OandaApi()
+# end

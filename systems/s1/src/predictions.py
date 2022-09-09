@@ -1,7 +1,6 @@
 # author: Quantium Rock & Marti Llanes
 # license: MIT
 
-import os
 import json
 import pickle
 import numpy as np
@@ -22,16 +21,13 @@ class Predictions( OandaApi ):
 
     def __init__(self, symbols=SYMBOLS, timeframe=TIMEFRAME, lookback=LOOKBACK):
 
-        super(OandaApi, self).__init__()
+        OandaApi.__init__(self)
 
         self.symbols = symbols
         self.timeframe = timeframe
         self.lookback = lookback
-        self.db_path = os.path.normpath(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/series/")
-        )
         self.ccys = self.getCcys()
-        op, hi, lo, cl, _ = self.getCandles()
+        op, hi, lo, cl, _ = self.getSymCandles()
         logs, rets, vols, higs, lows = self.normalizeData(op, hi, lo,cl)
         logs_, _, _, _, _, idxs_ = self.reduceDimension(logs, rets, vols, higs, lows)
         self.fx_rates = cl.iloc[-1]
@@ -53,7 +49,7 @@ class Predictions( OandaApi ):
         return ccys
 
     # get last lookback candles
-    def getCandles(self):
+    def getSymCandles(self):
 
         # init daily dataframes indices for asks & bids
         op = pd.DataFrame()
@@ -63,9 +59,9 @@ class Predictions( OandaApi ):
         vo = pd.DataFrame()
 
         # iterate each instrument to get a full week data each
-        for symbol in self.symbols:
+        for sym in self.symbols:
 
-            print(symbol)
+            print(sym)
 
             # initialize symbol data struct
             data = {
@@ -78,30 +74,31 @@ class Predictions( OandaApi ):
             }
 
             # request max 5000 bars from oanda rest-api
-            req = self.getLastCandles(symbol, self.timeframe, count=self.lookback*2)
+            req = self.getLastCandles(sym, self.timeframe, count=self.lookback)
 
-            # iterate each candle
-            for x in req:
-                # append data
-                data["dtime"].append(x["time"])
-                data["open"].append(float(x["mid"]["o"]))
-                data["high"].append(float(x["mid"]["h"]))
-                data["low"].append(float(x["mid"]["l"]))
-                data["close"].append(float(x["mid"]["c"]))
-                data["volume"].append(int(x["volume"]))
-
-            # ^ finished symbol year
+            if not req is None:
+                # iterate each candle
+                for x in req:
+                    # append data
+                    data["dtime"].append(x["time"])
+                    data["open"].append(float(x["mid"]["o"]))
+                    data["high"].append(float(x["mid"]["h"]))
+                    data["low"].append(float(x["mid"]["l"]))
+                    data["close"].append(float(x["mid"]["c"]))
+                    data["volume"].append(int(x["volume"]))
+            else:
+                print('\n> Empty dataset... Predictions.getLastCandles()')
 
             # transform data to prices dataframe
-            _op = pd.DataFrame(data["open"], index=data["dtime"], columns=[symbol])
+            _op = pd.DataFrame(data["open"], index=data["dtime"], columns=[sym])
             _op.index = pd.to_datetime(_op.index, utc=True)
-            _hi = pd.DataFrame(data["high"], index=data["dtime"], columns=[symbol])
+            _hi = pd.DataFrame(data["high"], index=data["dtime"], columns=[sym])
             _hi.index = pd.to_datetime(_hi.index, utc=True)
-            _lo = pd.DataFrame(data["low"], index=data["dtime"], columns=[symbol])
+            _lo = pd.DataFrame(data["low"], index=data["dtime"], columns=[sym])
             _lo.index = pd.to_datetime(_lo.index, utc=True)
-            _cl = pd.DataFrame(data["close"], index=data["dtime"], columns=[symbol])
+            _cl = pd.DataFrame(data["close"], index=data["dtime"], columns=[sym])
             _cl.index = pd.to_datetime(_cl.index, utc=True)
-            _vo = pd.DataFrame(data["volume"], index=data["dtime"], columns=[symbol])
+            _vo = pd.DataFrame(data["volume"], index=data["dtime"], columns=[sym])
             _vo.index = pd.to_datetime(_vo.index, utc=True)
 
             op = pd.merge(op, _op, how="outer", left_index=True, right_index=True)
@@ -244,7 +241,7 @@ class Predictions( OandaApi ):
     # load model params by symbol and output predictions
     def modelPredictions( self ):
 
-        op, hi, lo, cl, vo = self.getCandles()
+        op, hi, lo, cl, vo = self.getSymCandles()
 
         print(cl)
 
@@ -286,6 +283,7 @@ class Predictions( OandaApi ):
                 return np.array(X_tensor)
 
             X_pred = makeSequences( X )
+            X_pred[LOOKBACK:]
 
             print(X_pred.shape)
 

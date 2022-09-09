@@ -11,13 +11,14 @@ with open('config.json') as json_file:
 ACCOUNT = config['ACCOUNT']
 
 
-class Account:
+class Account( OandaApi ):
 
     def __init__( self, account_id=ACCOUNT ):
-        
-        self.oa = OandaApi()
+
+        OandaApi.__init__(self)
+
         self.account_id = account_id
-        self.account = self.getAccount()
+        self.account_state = self.getAccount()
         self.positions = self.getPositions()
         self.exposures = self.getExposures()
     
@@ -25,7 +26,7 @@ class Account:
     def getAccount( self ):
 
         try:
-            req = self.oa.getSummary(self.account_id)
+            req = self.getSummary(self.account_id)
         except:
             return 0
 
@@ -48,7 +49,7 @@ class Account:
     def getPositions( self ):
 
         try:
-            req = self.oa.getOpenPositions(self.account_id)
+            req = self.getOpenPositions(self.account_id)
         except:
             return 0
 
@@ -68,7 +69,7 @@ class Account:
                     'units': units,
                     'price': price,
                     'margin': round(float(x['marginUsed']),2),
-                    'allocation': round(float(x['marginUsed'])/self.account['NAV'],2),
+                    'allocation': round(float(x['marginUsed'])/self.account_state['NAV'],2),
                     'pnl_close': round(float(x['pl']),2),
                     'pnl_open': round(float(x['unrealizedPL']),2),
                     'fees': round(float(x['financing'])+float(x['commission']),2)
@@ -106,6 +107,6 @@ if __name__ == "__main__":
 
     acc = Account()
 
-    print('\n\n> Account:', acc.account, '\n\n> Positions:', acc.positions, '\n\n> Exposures:', acc.exposures)
+    print('\n\n> Account:', acc.account_state, '\n\n> Positions:', acc.positions, '\n\n> Exposures:', acc.exposures)
 
 # end
