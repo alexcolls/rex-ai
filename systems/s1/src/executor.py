@@ -47,10 +47,10 @@ if __name__ == "__main__":
 
     ex = Executor()
 
-    #ex.closeAll()
+    ex.closeAll()
 
     #time.sleep(10)
-    ex.sendOrders(ex.new_orders)
+    #ex.sendOrders(ex.new_orders)
 
 
 # end

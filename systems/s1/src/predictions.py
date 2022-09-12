@@ -34,7 +34,7 @@ class Predictions( OandaApi ):
         self.logs = logs
         self.logs_ = logs_
         self.idxs_ = idxs_
-        self.predictions = self.randomPredictions()
+        self.predictions = self.modelPredictions()
 
     # get currencies [str]
     def getCcys(self):
