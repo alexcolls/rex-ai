@@ -100,6 +100,20 @@ def atr(idxs: pd.DataFrame, low: pd.DataFrame, high: pd.DataFrame, window:int=14
     return data
 
 
+def fibonacci(close, highs, lows, k_period, d_period):
+    data = pd.DataFrame(index=highs.columns, inplace=True)
+    for ccy in highs.columns:
+        # Adds a "n_high" column with max value of previous 14 periods
+        data['n_high'] = highs[ccy].rolling(k_period).max()
+        #  Adds an "n_low" column with min value of previous 14 periods
+        data['n_low'] = lows[ccy].rolling(k_period).min()
+    # Uses the min/max values to calculate the %k (as a percentage)
+        data['%K'] = (close[ccy] - data['n_low']) * 100 / (data['n_high'] - data['n_low'])
+    # Uses the %k to calculates a SMA over the past 3 values of %k
+        data['%D'] = data['%K'].rolling(d_period).mean()
+
+        data.ta.stoch(high='high', low='low', k=14, d=3, append=True)
+
 
 # TENDENCY INDICATORS
 
