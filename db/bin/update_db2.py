@@ -50,11 +50,6 @@ def updateDB():
     TendencyFeatures().getTendency()
     VolatilityFeatures().getVolatility()
 
-    print("\n### BIG QUERY UPLOAD ###")
-    upload_csv_data("primary", ["closes"])
-    upload_csv_data("tertiary", ["logs_", "vols_"])
-    upload_tendency_volatility_data()
-
     print("\nYour DB is up to date. Bye!\n")
 
 
