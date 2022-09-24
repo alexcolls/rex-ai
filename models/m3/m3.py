@@ -32,7 +32,7 @@ SYMBOLS = []
 
 # prepare X and y tensors
 def prepData( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=LOOKBACK, load_SYMBOLS=False ):
-   
+
    ### TARGETS ###
 
     # load history log returns
@@ -43,7 +43,7 @@ def prepData( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRE
         global SYMBOLS
         SYMBOLS = y.columns
         return 0
-    
+
     # cut df and get target
     y.index = pd.to_datetime(y.index)
     y = y.replace([np.inf, -np.inf, np.nan], 0)
@@ -57,7 +57,7 @@ def prepData( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRE
             return -1
         else:
             return 0
-    
+
     # transform log returns to classification values
     y = y.map(lambda x: condition(x, threshold)).to_numpy()
 
@@ -103,7 +103,7 @@ def prepData( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRE
                 y_tensor.append(y.iloc[index+1])
             except:
                 break
-        
+
         X_tensor = np.array(X_tensor[:-1])
         y_tensor = np.array(y_tensor)
 
@@ -137,7 +137,7 @@ def buildModel( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
     # final prediction
     model.add( Dense(y.shape[-1], activation='softmax',) )
 
-    model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['precision'])
 
     print('\n')
 
@@ -151,7 +151,7 @@ def buildModel( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
 # train & validate the network
 def trainModel( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
 
-    early_stopping = EarlyStopping(monitor='accuracy', patience=10, mode='min', restore_best_weights=True)
+    early_stopping = EarlyStopping(monitor='precision', patience=10, mode='min', restore_best_weights=True)
 
     history = model.fit(X , y, epochs=epochs, batch_size=LOOKBACK, verbose=1, callbacks=[early_stopping], validation_data=(X_val, y_val))
 
@@ -159,17 +159,17 @@ def trainModel( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
 
     if plot: plotHistory(history)
 
-    return history 
+    return history
 
 
 # plot learning scores
 def plotHistory( history ):
 
     # summarize history for accuracy
-    plt.plot(history.history['accuracy'])
-    plt.plot(history.history['val_accuracy'])
-    plt.title('model accuracy')
-    plt.ylabel('accuracy')
+    plt.plot(history.history['precision'])
+    plt.plot(history.history['val_precision'])
+    plt.title('model precision')
+    plt.ylabel('precision')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
@@ -191,17 +191,17 @@ def makeScores( symbol, accuracy, loss, dataset='train' ):
 
     file = dataset+'_scores.csv'
 
-    field_names = ['symbol', 'accuracy', 'loss']
-    inp = {'symbol': symbol, 'accuracy': accuracy, 'loss': loss}
+    field_names = ['symbol', 'precision', 'loss']
+    inp = {'symbol': symbol, 'precision': accuracy, 'loss': loss}
 
     # append row to scores csv
     with open(file, 'a') as csv_file:
-        dict_object = csv.DictWriter(csv_file, fieldnames=field_names) 
+        dict_object = csv.DictWriter(csv_file, fieldnames=field_names)
         dict_object.writerow(inp)
-        
+
     return True
 
-    
+
 # main for function call.
 if __name__ == "__main__":
 
@@ -237,7 +237,7 @@ if __name__ == "__main__":
             makeScores( sym, round(results[1],2), round(results[0],2), dataset='val' )
 
             print('\n')
-            print('validation loss:', round(results[0],2), 'validation accuracy:', round(results[1],2))
+            print('validation loss:', round(results[0],2), 'validation precision:', round(results[1],2))
             print('\n')
 
         else:
@@ -258,7 +258,7 @@ if __name__ == "__main__":
             makeScores( sym, round(results[1],2), round(results[0],2), dataset='test' )
 
             print('\n')
-            print('test loss:', round(results[0],2), 'test accuracy:', round(results[1],2))
+            print('test loss:', round(results[0],2), 'test precision:', round(results[1],2))
             print('\n')
 
 

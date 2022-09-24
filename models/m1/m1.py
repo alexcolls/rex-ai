@@ -49,7 +49,7 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
             return -1
         else:
             return 0
-    
+
     y = y.map(lambda x: condition(x, threshold)).to_numpy()
 
     encoder = OneHotEncoder(sparse = False)
@@ -61,7 +61,7 @@ def prepData ( symbol, start_year=2010, final_year=2015, threshold=THRESHOLD, lo
     X = pd.read_csv(DB_PATH+'merge/tendency/tendency.csv', index_col=0)
     X.index = pd.to_datetime(X.index)
     X = X.loc[str(start_year)+'-01-01':str(final_year)+'-12-31']
-    
+
     # substract infinites and fill nans
     X.replace([np.inf, -np.inf], np.nan, inplace=True)
     X.fillna(method='bfill', inplace=True)
@@ -96,7 +96,7 @@ def buildModel ( X , y, neurons=NEURONS ):
     model.add(layers.Dense(neurons , activation='tanh'))
     model.add(layers.Dropout(0.2))
     model.add(Dense(y.shape[-1], activation='softmax',))
-    model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['precision'])
     model.summary()
 
     return model
@@ -104,22 +104,22 @@ def buildModel ( X , y, neurons=NEURONS ):
 
 def trainModel ( X , y, symbol, epochs=EPOCHS):
 
-    early_stopping = EarlyStopping(monitor='accuracy', patience=10, mode='min')
+    early_stopping = EarlyStopping(monitor='precision', patience=10, mode='min')
 
     history = model.fit(X , y, epochs=epochs, callbacks=[early_stopping])
 
     model.save(__file__[:-3]+'_'+symbol+'.h5')
 
-    return history 
+    return history
 
 
 def plotHistory ( history ):
 
     # summarize history for accuracy
-    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['precision'])
     #plt.plot(history.history['val_accuracy'])
     plt.title('model accuracy')
-    plt.ylabel('accuracy')
+    plt.ylabel('precision')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
