@@ -136,7 +136,7 @@ def buildModel( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
     # final prediction
     model.add( Dense(y.shape[-1], activation='softmax',) )
 
-    model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy', 'precision'])
 
     print('\n')
 

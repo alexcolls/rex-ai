@@ -1,7 +1,6 @@
 # author: Quantium Rock
 # license: MIT
 
-import pandas as pd
 from data_primary import PrimaryData
 from data_secondary import SecondaryData
 from data_tertiary import TertiaryData
