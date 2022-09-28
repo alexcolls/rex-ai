@@ -29,7 +29,7 @@ DB_PATH = '../../db/data/'
 SYMBOLS = []
 
 def prepData ( symbol='EUR_USD', start_year=2010, final_year=2015, threshold=THRESHOLD, lookback=LOOKBACK, load_SYMBOLS=False ):
-   
+
    ### TARGETS ###
 
     # load history log returns
@@ -121,7 +121,7 @@ def buildModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
     # final prediction
     model.add( Dense(y.shape[-1], activation='softmax',) )
 
-    model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['precision'])
 
     print('\n')
 
@@ -134,7 +134,7 @@ def buildModel ( X , y, layers=LAYERS, neurons=NEURONS, dropout=0.2 ):
 
 def trainModel ( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
 
-    early_stopping = EarlyStopping(monitor='accuracy', patience=2, mode='min', restore_best_weights=True)
+    early_stopping = EarlyStopping(monitor='precision', patience=2, mode='min', restore_best_weights=True)
 
     history = model.fit(X , y, epochs=epochs, batch_size=LOOKBACK, verbose=1, callbacks=[early_stopping], validation_data=(X_val, y_val))
 
@@ -142,16 +142,16 @@ def trainModel ( model, X, y, X_val, y_val, symbol, epochs=EPOCHS, plot=False):
 
     if plot: plotHistory(history)
 
-    return history 
+    return history
 
 
 def plotHistory ( history ):
 
     # summarize history for accuracy
-    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['precision'])
     #plt.plot(history.history['val_accuracy'])
     plt.title('model accuracy')
-    plt.ylabel('accuracy')
+    plt.ylabel('precision')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
@@ -199,7 +199,7 @@ if __name__ == "__main__":
             results = model.evaluate(X_valid, y_valid)
 
             print('\n')
-            print('test loss:', round(results[0],2), 'test accuracy:', round(results[1],2))
+            print('test loss:', round(results[0],2), 'test precision:', round(results[1],2))
             print('\n')
 
         else:
@@ -214,7 +214,7 @@ if __name__ == "__main__":
             print(results)
 
             print('\n')
-            print('test loss:', round(results[0],2), 'test accuracy:', round(results[1],2))
+            print('test loss:', round(results[0],2), 'test precision:', round(results[1],2))
             print('\n')
 
 
