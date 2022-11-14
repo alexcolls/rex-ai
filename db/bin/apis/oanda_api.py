@@ -48,7 +48,7 @@ class OandaApi:
         # set request session  and add authentification metadata
         self.client = requests.Session()
         self.client.headers["Authorization"] = "Bearer " + self.TOKEN
-        self.client.headers['Content-Type'] = 'application/json'      
+        self.client.headers['Content-Type'] = 'application/json'
         self.api_version = 'v3'
         self.accounts = self.getAccounts()
 
@@ -70,13 +70,13 @@ class OandaApi:
         accs = []
         for x in req:
             accs.append(x['id'])
-        
+
         return accs
 
-     
+
     # return the account state (NAV, PnL, margin, accCurrency, etc)
     def getSummary( self, account_id=None ):
-        
+
         if account_id is None:
             account_id = self.accounts[0]
 
@@ -88,10 +88,10 @@ class OandaApi:
         except Exception as e:
             print(e)
 
-    
+
     # return a json with all tradeable instruments for a given accoount
     def getInstruments( self, account_id ):
-        
+
         if account_id is None:
             account_id = self.accounts[0]
 
@@ -103,10 +103,10 @@ class OandaApi:
         except Exception as e:
             print(e)
 
-    
+
     # return a list of the current trading positions for a given account
     def getOpenPositions( self, account_id ):
-        
+
         if account_id is None:
             account_id = self.accounts[0]
 
@@ -118,10 +118,10 @@ class OandaApi:
         except Exception as e:
             print(e)
 
-    
+
     # return a list with the PnLs of each instrument for a given account
     def getAllPositions( self, account_id ):
-        
+
         if account_id is None:
             account_id = self.accounts[0]
 
@@ -136,7 +136,7 @@ class OandaApi:
 
     # return a list of the current open trades for a given account
     def getOpenTrades( self, account_id ):
-        
+
         if account_id is None:
             account_id = self.accounts[0]
 
@@ -151,7 +151,7 @@ class OandaApi:
 
     # return a list of all historical trades of the account
     def getAllTrades( self, account_id ):
-        
+
         if account_id is None:
             account_id = self.accounts[0]
 
@@ -163,10 +163,10 @@ class OandaApi:
         except Exception as e:
             print(e)
 
-    
+
     # return a list of the current pending orders for a given account
     def getPendingOrders( self, account_id ):
-        
+
         if account_id is None:
             account_id = self.accounts[0]
 
@@ -177,11 +177,11 @@ class OandaApi:
             return json.loads(req.content.decode("utf-8"))['orders']
         except Exception as e:
             print(e)
-            
+
 
     # return a list of all historical orders of the account
     def getAllOrders( self, account_id ):
-        
+
         if account_id is None:
             account_id = self.accounts[0]
 
@@ -208,7 +208,7 @@ class OandaApi:
             return json.loads(req.content.decode("utf-8"))["candles"]
         except Exception as e:
             print(e)
-    
+
 
     # return last n candles by symbol & timeframe
     def getLastCandles( self, symbol, timeframe, count=5000, mids=True ):
@@ -223,7 +223,7 @@ class OandaApi:
             return json.loads(req.content.decode("utf-8"))["candles"]
         except Exception as e:
             print(e)
-    
+
 
     ### POST methods ###
 
@@ -237,8 +237,8 @@ class OandaApi:
                 "timeInForce": time_in_force,
                 "units": str(units)
                 } }
-                
-        data = json.dumps(data, indent=4) 
+
+        data = json.dumps(data, indent=4)
 
         try:
             req = self.client.post( f"{self.enviroment}/{self.api_version}/accounts/{account_id}/orders", data=str(data) )
