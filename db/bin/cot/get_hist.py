@@ -1,7 +1,7 @@
 
 # CONCAT FULL HISTORY OF G8 CURRENCIES COT POSITIONS BETWEEN SPECULATORS & COMMERCIALS
 
-# author: Quantium Rock
+# author: Quantium Rock, MartiLlanes
 # license: MIT
 # date: August 2022
 
@@ -12,6 +12,10 @@
 import pandas as pd
 
 from pathlib import Path
+
+from functools import reduce
+
+import os
 
 
 def net_positions(instrument):
@@ -89,11 +93,6 @@ def compute_history():
                     }
 
 
-
-    #data_sets = Path.cwd() / 'model/db/bin/apis/cot/'
-    #cot_reports = data_sets /
-    """ modified this, incorrect path"""
-
     for year in range(2022, 2004, -1):
         print(year)
         market_data = pd.read_csv(Path.cwd() / 'cots_raw'/ f'deacot{str(year)}' / 'annual.txt', delimiter=',', usecols=columns)
@@ -115,12 +114,40 @@ def compute_history():
                         f'long = {speculators_long} %,',
                         f'short = {speculators_short} % \n',
                     )
+    return speculators,hedgers
 
 
-    return speculators, hedgers
+def get_cot():
+    speculators, hedgers = compute_history()
+    dfs_s= []
+    dfs_h = []
+    for ccy in speculators.keys():
+        if len(speculators[ccy]) != 0:
+            dfs_s.append(pd.DataFrame(speculators[ccy]).rename(columns={0:"date",1:f"{ccy}_speculators_net_position",2:f"{ccy}_long",3:f"{ccy}_short"}))
+        if len(hedgers[ccy]) != 0:
+            dfs_h.append(pd.DataFrame(hedgers[ccy]).rename(columns={0:"date",1:f"{ccy}_hedgers_net_position"}))
 
-# cot_spec, cot_comm = compute_history()
 
+    df_s = reduce(lambda  left,right: left.merge(right , left_on = "date" , right_on = "date", how = "outer"),dfs_s)
+    df_h = reduce(lambda  left,right: pd.merge(left,right,on=['date'], how='outer'), dfs_h)
+    df_s.fillna(0,inplace=True)
+    df_h.fillna(0,inplace=True)
+
+    data_cot_path = os.path.normpath(
+            os.path.join(os.path.dirname(os.path.abspath("cot.ipynb")), "../..", "data", "cot"
+            )
+        )
+    os.makedirs(data_cot_path,exist_ok=True)
+    df_s.to_csv(os.path.join(data_cot_path, "speculators.csv"), index=True)
+    df_h.to_csv(os.path.join(data_cot_path, "hedgers.csv"), index=True)
+
+
+    # del df_s, df_h, speculators,hedgers # Cleaning memory
+
+    return True
+
+if __name__ == "__main__":
+    get_cot()
 
 
 # TODO
