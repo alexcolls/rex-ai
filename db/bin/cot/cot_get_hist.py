@@ -145,12 +145,3 @@ def get_cot():
     # del df_s, df_h, speculators,hedgers # Cleaning memory
 
     return True
-
-if __name__ == "__main__":
-    get_cot()
-
-
-# TODO
-
-# convert cot_spec and cot_comm in dataframes and save to csv files in db/data -> SEE COT.IPYNB
-# change were this compute_history() is called.
