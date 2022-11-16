@@ -7,7 +7,7 @@ from data_tertiary import TertiaryData
 from merge import merge_db_data
 from volatility import VolatilityFeatures
 from tendency import TendencyFeatures
-
+from cot.cot_get_hist import get_cot
 
 def updateDB():
 
@@ -36,7 +36,10 @@ def updateDB():
     tertiaryData.checkDB()
     tertiaryData.updateDB()
 
-    print("\nPrimary, Secondary & Tertiary DB up to date!")
+    print("\n### COMITMENT OF TRADERS DB ###")
+    get_cot()
+
+    print("\nPrimary, Secondary & Tertiary DB up to date! \nCOT dowloaded and up to date!")
     # input("\nDo you wanna merge db's?\n> Press Enter to proceed\n\n>>> ")
 
     print("\n### MERGE DB DATA ###")
