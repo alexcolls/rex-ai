@@ -7,7 +7,7 @@ from data_tertiary import TertiaryData
 from merge import merge_db_data
 from volatility import VolatilityFeatures
 from tendency import TendencyFeatures
-from cot.cot_get_hist import get_cot
+from cot.get_hist import get_cot
 
 def updateDB():
 

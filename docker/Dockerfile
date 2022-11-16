@@ -7,3 +7,4 @@ RUN pip install --upgrade pip
 RUN pip install -r docker/requirements.txt
 
 CMD mkdir -p /data/primary; mkdir -p /data/secondary; mkdir -p /data/tertiary; python /docker/update_db.py
+

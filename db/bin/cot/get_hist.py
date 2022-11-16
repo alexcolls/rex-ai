@@ -3,10 +3,15 @@
 
 # author: Quantium Rock, MartiLlanes
 # license: MIT
-# date: August 2022
+# date: October 2022
 
 """
-    The Commodity Futures Trading Commission (US Derivatives Trading Commission or CFTC) publishes the Commitments of Traders (COT) reports to help the public understand market dynamics. Specifically, the COT reports provide a breakdown of each Tuesday’s open interest for futures and options on futures markets in which 20 or more traders hold positions equal to or above the reporting levels established by the CFTC.
+    The Commodity Futures Trading Commission
+    (US Derivatives Trading Commission or CFTC)
+    publishes the Commitments of Traders (COT)
+    reports to help the public understand market dynamics.
+    Specifically, the COT reports provide a breakdown of each Tuesday’s open interest for futures and options
+    on futures markets in which 20 or more traders hold positions equal to or above the reporting levels established by the CFTC.
 """
 
 import pandas as pd
@@ -16,6 +21,7 @@ from pathlib import Path
 from functools import reduce
 
 import os
+
 
 
 def net_positions(instrument):
@@ -95,7 +101,7 @@ def compute_history():
 
     for year in range(2022, 2004, -1):
         print(year)
-        market_data = pd.read_csv(Path.cwd() / 'cots_raw'/ f'deacot{str(year)}' / 'annual.txt', delimiter=',', usecols=columns)
+        market_data = pd.read_csv(Path.cwd()/'cot'/ 'cots_raw'/ f'deacot{str(year)}' / 'annual.txt', delimiter=',', usecols=columns)
         "this is the direct implication since you call get hist from this folder"
         # market_data = pd.read_csv(Path.cwd() / cot_reports / 'deacot2018' / 'annual.txt', delimiter=',', usecols=columns)
         for ccy, cnts in contracts.items():
@@ -114,7 +120,7 @@ def compute_history():
                         f'long = {speculators_long} %,',
                         f'short = {speculators_short} % \n',
                     )
-    return speculators,hedgers
+    return speculators, hedgers
 
 
 def get_cot():

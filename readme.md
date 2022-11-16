@@ -35,6 +35,6 @@ This will update the database, taking into account the last hour, you only need 
 ### run program
 This will update the database, do the prediction, output the side and size signals and run the executor
 
-> python run.py
+> python first_run.py
 
 ...follow terminal instructions
