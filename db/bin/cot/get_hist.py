@@ -44,7 +44,7 @@ def speculators_sentiment(instrument):
     speculators_short = instrument[3] / (instrument[2] + instrument[3])
     return round(speculators_long, 4), round(speculators_short, 4)
 
-        
+
 def compute_history():
 
     columns = [
@@ -61,7 +61,7 @@ def compute_history():
 
     contracts = {   'AUD': 'AUSTRALIAN DOLLAR',
                     'CAD': 'CANADIAN DOLLAR',
-                    'CHF': 'SWISS FRANC',    
+                    'CHF': 'SWISS FRA  NC',
                     'EUR': 'EURO FX',
                     'GBP': 'BRITISH POUND',
                     'JPY': 'JAPANESE YEN',
@@ -71,21 +71,33 @@ def compute_history():
 
     speculators =   {   'AUD': [],
                         'CAD': [],
-                        'CHF': [],    
+                        'CHF': [],
                         'EUR': [],
                         'GBP': [],
                         'JPY': [],
                         'NZD': [],
                     }
 
-    hedgers = speculators.copy()
-    
-    data_sets = Path.cwd() / 'model/db/bin/apis/cot/'
-    cot_reports = data_sets / 'cots_raw' 
+    # if you do headgers = speculators.copy() for some reason copyes the data all together
+    hedgers = {   'AUD': [],
+                        'CAD': [],
+                        'CHF': [],
+                        'EUR': [],
+                        'GBP': [],
+                        'JPY': [],
+                        'NZD': [],
+                    }
+
+
+
+    #data_sets = Path.cwd() / 'model/db/bin/apis/cot/'
+    #cot_reports = data_sets /
+    """ modified this, incorrect path"""
 
     for year in range(2022, 2004, -1):
         print(year)
-        market_data = pd.read_csv(Path.cwd() / cot_reports / f'deacot{str(year)}' / 'annual.txt', delimiter=',', usecols=columns)
+        market_data = pd.read_csv(Path.cwd() / 'cots_raw'/ f'deacot{str(year)}' / 'annual.txt', delimiter=',', usecols=columns)
+        "this is the direct implication since you call get hist from this folder"
         # market_data = pd.read_csv(Path.cwd() / cot_reports / 'deacot2018' / 'annual.txt', delimiter=',', usecols=columns)
         for ccy, cnts in contracts.items():
             for market in market_data.values:
@@ -104,16 +116,14 @@ def compute_history():
                         f'short = {speculators_short} % \n',
                     )
 
-    
+
     return speculators, hedgers
 
-cot_spec, cot_comm = compute_history()
+# cot_spec, cot_comm = compute_history()
 
-print(cot_spec, cot_comm)
 
 
 # TODO
 
-# convert cot_spec and cot_comm in dataframes and save to csv files in db/data
-
-
+# convert cot_spec and cot_comm in dataframes and save to csv files in db/data -> SEE COT.IPYNB
+# change were this compute_history() is called.
