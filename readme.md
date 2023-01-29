@@ -17,24 +17,32 @@ The data cleaning and predictions are done using Pandas, Sklearn, TensorFlow (Ke
 To try Rex-AI, follow the instructions below
 
 ### clone
-> git clone https://github.com/quantium-rock/rex-ai
+```
+git clone https://github.com/quantium-rock/rex-ai
+```
 
 ### directory
-> cd rex-ai/
+```
+cd rex-ai/
+```
 
 ### install
-> python setup.py
+```
+python setup.py
+```
 
 ### update database
 This will update the database, taking into account the last hour, you only need to do this once.
 
-> python db/bin/update_db.py
-
-
+```
+python db/bin/update_db.py
+```
 
 ### run program
 This will update the database, do the prediction, output the side and size signals and run the executor
 
-> python first_run.py
+```
+python first_run.py
+```
 
 ...follow terminal instructions
