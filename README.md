@@ -1,4 +1,4 @@
-# 🤖 REX-AI
+# 🦖 REX-AI
 
 <div align="center">
 
