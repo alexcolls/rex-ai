@@ -6,7 +6,7 @@ dash_html_components==1.1.2
 numpy==1.23.1
 pandas==1.4.3
 matplotlib
-requests==2.32.4
+requests==2.33.0
 statsmodels #tsa.arima.model import arima
 arch
 scipy
